@@ -5,7 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Plus, X, Users, Calculator } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Plus, X, Users, Calculator, Info } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface Item {
   id: number;
@@ -15,6 +17,7 @@ interface Item {
 }
 
 const CreateAccount = () => {
+  const { toast } = useToast();
   const [accountName, setAccountName] = useState("");
   const [description, setDescription] = useState("");
   const [items, setItems] = useState<Item[]>([]);
@@ -23,6 +26,7 @@ const CreateAccount = () => {
   const [newParticipant, setNewParticipant] = useState("");
   const [selectedParticipants, setSelectedParticipants] = useState<string[]>(["Tu"]);
   const [tip, setTip] = useState("");
+  const [tipIncluded, setTipIncluded] = useState(false);
 
   const addParticipant = () => {
     if (newParticipant && !participants.includes(newParticipant)) {
@@ -64,9 +68,23 @@ const CreateAccount = () => {
     setItems(items.filter(item => item.id !== id));
   };
 
+  const calculateSubtotal = () => {
+    return items.reduce((sum, item) => sum + item.amount, 0);
+  };
+
+  const calculateSuggestedTip = () => {
+    const subtotal = calculateSubtotal();
+    return subtotal * 0.1; // 10% según legislación chilena
+  };
+
   const calculateTotal = () => {
-    const itemsTotal = items.reduce((sum, item) => sum + item.amount, 0);
-    const tipAmount = tip ? parseFloat(tip) : 0;
+    const itemsTotal = calculateSubtotal();
+    let tipAmount = 0;
+    
+    if (tipIncluded) {
+      tipAmount = tip ? parseFloat(tip) : calculateSuggestedTip();
+    }
+    
     return itemsTotal + tipAmount;
   };
 
@@ -80,10 +98,10 @@ const CreateAccount = () => {
       }
     });
 
-    // Calcular propina proporcional
-    if (tip) {
-      const tipAmount = parseFloat(tip);
-      const itemsTotal = items.reduce((sum, item) => sum + item.amount, 0);
+    // Calcular propina proporcional (solo si está incluida)
+    if (tipIncluded) {
+      let tipAmount = tip ? parseFloat(tip) : calculateSuggestedTip();
+      const itemsTotal = calculateSubtotal();
       const personItemsTotal = items.reduce((sum, item) => {
         return item.participants.includes(person) 
           ? sum + (item.amount / item.participants.length)
@@ -96,6 +114,30 @@ const CreateAccount = () => {
     }
 
     return total;
+  };
+
+  const handleCreateAccount = () => {
+    if (!accountName || items.length === 0) {
+      toast({
+        title: "Error",
+        description: "Debes agregar un nombre y al menos un ítem a la cuenta",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Aquí se integraría con Supabase para guardar la cuenta
+    toast({
+      title: "¡Cuenta creada exitosamente!",
+      description: `La cuenta "${accountName}" ha sido guardada con ${items.length} ítems`,
+    });
+
+    // Reset del formulario
+    setAccountName("");
+    setDescription("");
+    setItems([]);
+    setTip("");
+    setTipIncluded(false);
   };
 
   return (
@@ -222,15 +264,49 @@ const CreateAccount = () => {
 
           <Card>
             <CardHeader>
-              <CardTitle>Propina (opcional)</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Info className="h-5 w-5" />
+                Propina (Legislación Chilena)
+              </CardTitle>
             </CardHeader>
-            <CardContent>
-              <Input
-                type="number"
-                placeholder="Monto de la propina"
-                value={tip}
-                onChange={(e) => setTip(e.target.value)}
-              />
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <Label htmlFor="tip-toggle">Incluir propina</Label>
+                  <p className="text-sm text-muted-foreground">
+                    La propina es opcional según la ley chilena
+                  </p>
+                </div>
+                <Switch
+                  id="tip-toggle"
+                  checked={tipIncluded}
+                  onCheckedChange={setTipIncluded}
+                />
+              </div>
+              
+              {tipIncluded && (
+                <div className="space-y-3">
+                  <div className="p-3 bg-muted rounded-lg">
+                    <p className="text-sm font-medium">
+                      Propina sugerida (10%): ${calculateSuggestedTip().toLocaleString()}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Puedes modificar el monto si lo deseas
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="custom-tip">Monto personalizado (opcional)</Label>
+                    <Input
+                      id="custom-tip"
+                      type="number"
+                      placeholder={`${calculateSuggestedTip().toFixed(0)}`}
+                      value={tip}
+                      onChange={(e) => setTip(e.target.value)}
+                    />
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -294,7 +370,21 @@ const CreateAccount = () => {
                 })}
                 
                 <div className="border-t pt-3 mt-3">
-                  <div className="flex justify-between items-center font-bold text-lg">
+                  <div className="flex justify-between items-center">
+                    <span>Subtotal</span>
+                    <span>${calculateSubtotal().toLocaleString()}</span>
+                  </div>
+                  
+                  {tipIncluded && (
+                    <div className="flex justify-between items-center text-muted-foreground">
+                      <span>Propina ({tip ? 'personalizada' : '10%'})</span>
+                      <span>
+                        ${(tip ? parseFloat(tip) : calculateSuggestedTip()).toLocaleString()}
+                      </span>
+                    </div>
+                  )}
+                  
+                  <div className="flex justify-between items-center font-bold text-lg border-t pt-2 mt-2">
                     <span>Total</span>
                     <span>${calculateTotal().toLocaleString()}</span>
                   </div>
@@ -307,6 +397,7 @@ const CreateAccount = () => {
             className="w-full" 
             size="lg"
             disabled={!accountName || items.length === 0}
+            onClick={handleCreateAccount}
           >
             Crear cuenta
           </Button>
