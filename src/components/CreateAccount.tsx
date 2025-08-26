@@ -101,15 +101,16 @@ const CreateAccount = () => {
     // Calcular propina proporcional (solo si está incluida)
     if (tipIncluded) {
       let tipAmount = tip ? parseFloat(tip) : calculateSuggestedTip();
-      const itemsTotal = calculateSubtotal();
-      const personItemsTotal = items.reduce((sum, item) => {
+      const subtotal = calculateSubtotal();
+      const personSubtotal = items.reduce((sum, item) => {
         return item.participants.includes(person) 
           ? sum + (item.amount / item.participants.length)
           : sum;
       }, 0);
       
-      if (itemsTotal > 0) {
-        total += (tipAmount * personItemsTotal) / itemsTotal;
+      if (subtotal > 0) {
+        // La propina se distribuye proporcionalmente según lo que cada persona consumió del subtotal
+        total += (tipAmount * personSubtotal) / subtotal;
       }
     }
 
@@ -288,22 +289,26 @@ const CreateAccount = () => {
                 <div className="space-y-3">
                   <div className="p-3 bg-muted rounded-lg">
                     <p className="text-sm font-medium">
-                      Propina sugerida (10%): ${calculateSuggestedTip().toLocaleString()}
+                      Propina sugerida (10% sobre el total): ${calculateSuggestedTip().toLocaleString()}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Puedes modificar el monto si lo deseas
+                      Puedes agregar un monto igual o superior al 10%
                     </p>
                   </div>
                   
                   <div>
-                    <Label htmlFor="custom-tip">Monto personalizado (opcional)</Label>
+                    <Label htmlFor="custom-tip">Monto de propina</Label>
                     <Input
                       id="custom-tip"
                       type="number"
                       placeholder={`${calculateSuggestedTip().toFixed(0)}`}
                       value={tip}
                       onChange={(e) => setTip(e.target.value)}
+                      min={calculateSuggestedTip()}
                     />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Mínimo ${calculateSuggestedTip().toLocaleString()} (10% del subtotal)
+                    </p>
                   </div>
                 </div>
               )}
@@ -377,7 +382,7 @@ const CreateAccount = () => {
                   
                   {tipIncluded && (
                     <div className="flex justify-between items-center text-muted-foreground">
-                      <span>Propina ({tip ? 'personalizada' : '10%'})</span>
+                      <span>Propina sobre el total</span>
                       <span>
                         ${(tip ? parseFloat(tip) : calculateSuggestedTip()).toLocaleString()}
                       </span>
