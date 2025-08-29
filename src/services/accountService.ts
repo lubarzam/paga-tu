@@ -171,13 +171,21 @@ export const accountService = {
       ...data,
       account_items: await Promise.all(
         data.account_items.map(async (item: any) => {
-          const { data: itemParticipants } = await supabase
+          const { data: itemParticipants, error } = await supabase
             .from('item_participants')
             .select('participant_id')
             .eq('item_id', item.id);
 
+          if (error) {
+            console.error('Error fetching item participants:', error);
+            return { ...item, participants: [] };
+          }
+
           const participantsDetails = (itemParticipants || [])
-            .map((ip: any) => data.account_participants.find((ap: any) => ap.id === ip.participant_id))
+            .map((ip: any) => {
+              // Find the participant by matching the participant_id with account_participants.id
+              return data.account_participants.find((ap: any) => ap.id === ip.participant_id);
+            })
             .filter(Boolean);
 
           return {
