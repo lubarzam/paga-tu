@@ -6,16 +6,20 @@ const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-api-version",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests first
   if (req.method === "OPTIONS") {
+    const reqHeaders = req.headers.get('Access-Control-Request-Headers') ?? corsHeaders["Access-Control-Allow-Headers"];
     return new Response(null, { 
       status: 200,
-      headers: corsHeaders 
+      headers: { 
+        ...corsHeaders,
+        "Access-Control-Allow-Headers": reqHeaders,
+      }
     });
   }
 
