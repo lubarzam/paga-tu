@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { DollarSign, Calculator, Users, Bell, ArrowRight, Star } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useEffect } from "react";
 import heroImage from "@/assets/hero-banner.jpg";
 import featureSplit from "@/assets/feature-split.jpg";
 import featurePrecise from "@/assets/feature-precise.jpg";
@@ -11,6 +12,11 @@ import featureTrack from "@/assets/feature-track.jpg";
 const LandingPage = () => {
   const navigate = useNavigate();
   const { user, signInWithGoogle } = useAuth();
+
+  // Auto-redirect to dashboard if already authenticated
+  useEffect(() => {
+    if (user) navigate('/dashboard');
+  }, [user, navigate]);
 
   const handleAuthAction = async () => {
     if (user) {
