@@ -7,16 +7,22 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Plus, X, Users, Calculator, Info } from "lucide-react";
+import { Plus, X, Users, Calculator, Info, ChevronDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { accountService } from "@/services/accountService";
+import { contactsService, FrequentContact } from "@/services/contactsService";
 
 interface Item {
   id: number;
   name: string;
   amount: number;
-  participants: string[];
+  participants: string[]; // participant names
+}
+
+interface Participant {
+  name: string;
+  email: string;
 }
 
 const CreateAccount = () => {
@@ -27,9 +33,13 @@ const CreateAccount = () => {
   const [description, setDescription] = useState("");
   const [items, setItems] = useState<Item[]>([]);
   const [currentItem, setCurrentItem] = useState({ name: "", amount: "" });
-  const [participants, setParticipants] = useState<string[]>([]);
-  const [newParticipant, setNewParticipant] = useState("");
-  const [selectedParticipants, setSelectedParticipants] = useState<string[]>([]);
+  const [participants, setParticipants] = useState<Participant[]>([]);
+  const [newParticipantName, setNewParticipantName] = useState("");
+  const [newParticipantEmail, setNewParticipantEmail] = useState("");
+  const [selectedParticipants, setSelectedParticipants] = useState<string[]>(["Tu"]);
+  const [frequentContacts, setFrequentContacts] = useState<FrequentContact[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [filteredSuggestions, setFilteredSuggestions] = useState<FrequentContact[]>([]);
   const [tip, setTip] = useState("");
   const [tipIncluded, setTipIncluded] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -40,25 +50,114 @@ const CreateAccount = () => {
     }
   }, [user, loading, navigate]);
 
-  const addParticipant = () => {
-    if (newParticipant && !participants.includes(newParticipant)) {
-      setParticipants([...participants, newParticipant]);
-      setNewParticipant("");
+  useEffect(() => {
+    if (user) {
+      loadFrequentContacts();
     }
-  };
+  }, [user]);
 
-  const removeParticipant = (participant: string) => {
-    if (participant !== "Tu") {
-      setParticipants(participants.filter(p => p !== participant));
-      setSelectedParticipants(selectedParticipants.filter(p => p !== participant));
-    }
-  };
-
-  const toggleParticipant = (participant: string) => {
-    if (selectedParticipants.includes(participant)) {
-      setSelectedParticipants(selectedParticipants.filter(p => p !== participant));
+  useEffect(() => {
+    if (newParticipantName || newParticipantEmail) {
+      searchContacts();
     } else {
-      setSelectedParticipants([...selectedParticipants, participant]);
+      setFilteredSuggestions([]);
+      setShowSuggestions(false);
+    }
+  }, [newParticipantName, newParticipantEmail]);
+
+  const loadFrequentContacts = async () => {
+    try {
+      const contacts = await contactsService.getFrequentContacts();
+      setFrequentContacts(contacts);
+    } catch (error) {
+      console.error('Error loading frequent contacts:', error);
+    }
+  };
+
+  const searchContacts = async () => {
+    const query = newParticipantName || newParticipantEmail;
+    if (query.length < 2) {
+      setFilteredSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    try {
+      const suggestions = await contactsService.searchContacts(query);
+      setFilteredSuggestions(suggestions);
+      setShowSuggestions(suggestions.length > 0);
+    } catch (error) {
+      console.error('Error searching contacts:', error);
+      setFilteredSuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
+
+  const selectSuggestion = (contact: FrequentContact) => {
+    setNewParticipantName(contact.name);
+    setNewParticipantEmail(contact.email);
+    setShowSuggestions(false);
+  };
+
+  const addParticipant = async () => {
+    if (!newParticipantName.trim() || !newParticipantEmail.trim()) {
+      toast({
+        title: "Error",
+        description: "Debes ingresar nombre y email del participante",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const emailExists = participants.some(p => p.email === newParticipantEmail);
+    if (emailExists) {
+      toast({
+        title: "Error",
+        description: "Este email ya está agregado",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const newParticipant: Participant = {
+      name: newParticipantName.trim(),
+      email: newParticipantEmail.trim()
+    };
+
+    setParticipants([...participants, newParticipant]);
+    
+    // Save to frequent contacts
+    try {
+      await contactsService.addOrUpdateContact(newParticipant.name, newParticipant.email);
+      await loadFrequentContacts(); // Refresh the list
+    } catch (error) {
+      console.error('Error saving frequent contact:', error);
+    }
+
+    setNewParticipantName("");
+    setNewParticipantEmail("");
+    setShowSuggestions(false);
+  };
+
+  const removeParticipant = (email: string) => {
+    setParticipants(participants.filter(p => p.email !== email));
+    setSelectedParticipants(selectedParticipants.filter(p => p !== getParticipantName(email)));
+  };
+
+  const getParticipantName = (email: string) => {
+    const participant = participants.find(p => p.email === email);
+    return participant ? participant.name : email;
+  };
+
+  const getAllParticipantNames = () => {
+    return ["Tu", ...participants.map(p => p.name)];
+  };
+
+  const toggleParticipant = (participantName: string) => {
+    if (selectedParticipants.includes(participantName)) {
+      setSelectedParticipants(selectedParticipants.filter(p => p !== participantName));
+    } else {
+      setSelectedParticipants([...selectedParticipants, participantName]);
     }
   };
 
@@ -169,9 +268,9 @@ const CreateAccount = () => {
           amount: item.amount,
           participants: item.participants,
         })),
-        participants: participants.map(email => ({
-          email,
-          name: email.split('@')[0], // Usar parte antes del @ como nombre temporal
+        participants: participants.map(participant => ({
+          email: participant.email,
+          name: participant.name,
         })),
         tipIncluded,
         tipAmount: tipIncluded ? (tip ? parseFloat(tip) : calculateSuggestedTip()) : 0,
@@ -243,30 +342,65 @@ const CreateAccount = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex flex-wrap gap-2">
+                <Badge variant="default">Tu</Badge>
                 {participants.map((participant) => (
-                  <div key={participant} className="flex items-center gap-1">
-                    <Badge variant={participant === "Tu" ? "default" : "secondary"}>
-                      {participant}
-                      {participant !== "Tu" && (
-                        <X 
-                          className="h-3 w-3 ml-1 cursor-pointer" 
-                          onClick={() => removeParticipant(participant)}
-                        />
-                      )}
+                  <div key={participant.email} className="flex items-center gap-1">
+                    <Badge variant="secondary">
+                      {participant.name}
+                      <X 
+                        className="h-3 w-3 ml-1 cursor-pointer" 
+                        onClick={() => removeParticipant(participant.email)}
+                      />
                     </Badge>
                   </div>
                 ))}
               </div>
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Email del participante (ej: juan@email.com)"
-                  type="email"
-                  value={newParticipant}
-                  onChange={(e) => setNewParticipant(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && addParticipant()}
-                />
-                <Button onClick={addParticipant}>
-                  <Plus className="h-4 w-4" />
+              
+              <div className="space-y-2">
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="relative">
+                    <Label htmlFor="participantName">Nombre</Label>
+                    <Input
+                      id="participantName"
+                      placeholder="Nombre del participante"
+                      value={newParticipantName}
+                      onChange={(e) => setNewParticipantName(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="participantEmail">Email</Label>
+                    <Input
+                      id="participantEmail"
+                      type="email"
+                      placeholder="email@ejemplo.com"
+                      value={newParticipantEmail}
+                      onChange={(e) => setNewParticipantEmail(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && addParticipant()}
+                    />
+                  </div>
+                </div>
+                
+                {showSuggestions && filteredSuggestions.length > 0 && (
+                  <div className="relative">
+                    <div className="absolute top-0 left-0 right-0 bg-card border border-border rounded-md shadow-lg z-50 max-h-40 overflow-y-auto">
+                      {filteredSuggestions.map((contact) => (
+                        <div
+                          key={contact.id}
+                          className="px-3 py-2 hover:bg-accent cursor-pointer border-b last:border-b-0"
+                          onClick={() => selectSuggestion(contact)}
+                        >
+                          <div className="font-medium">{contact.name}</div>
+                          <div className="text-sm text-muted-foreground">{contact.email}</div>
+                          <div className="text-xs text-muted-foreground">Usado {contact.usage_count} veces</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                <Button onClick={addParticipant} className="w-full">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Agregar participante
                 </Button>
               </div>
             </CardContent>
@@ -302,14 +436,14 @@ const CreateAccount = () => {
               <div>
                 <Label>¿Quién participó en este ítem?</Label>
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {participants.map((participant) => (
+                  {getAllParticipantNames().map((participantName) => (
                     <Badge
-                      key={participant}
-                      variant={selectedParticipants.includes(participant) ? "default" : "outline"}
+                      key={participantName}
+                      variant={selectedParticipants.includes(participantName) ? "default" : "outline"}
                       className="cursor-pointer"
-                      onClick={() => toggleParticipant(participant)}
+                      onClick={() => toggleParticipant(participantName)}
                     >
-                      {participant}
+                      {participantName}
                     </Badge>
                   ))}
                 </div>
@@ -418,7 +552,7 @@ const CreateAccount = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {participants.map((person) => {
+                {getAllParticipantNames().map((person) => {
                   const amount = calculatePersonTotal(person);
                   return (
                     <div key={person} className="flex justify-between items-center">

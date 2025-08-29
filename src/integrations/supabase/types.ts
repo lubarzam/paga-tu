@@ -144,6 +144,36 @@ export type Database = {
           },
         ]
       }
+      frequent_contacts: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          last_used_at: string
+          name: string
+          usage_count: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          last_used_at?: string
+          name: string
+          usage_count?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          last_used_at?: string
+          name?: string
+          usage_count?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       invitations: {
         Row: {
           account_id: string
