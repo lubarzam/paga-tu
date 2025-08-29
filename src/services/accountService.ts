@@ -173,15 +173,16 @@ export const accountService = {
         data.account_items.map(async (item: any) => {
           const { data: itemParticipants } = await supabase
             .from('item_participants')
-            .select(`
-              participant_id,
-              account_participants!inner(name, email, is_registered)
-            `)
+            .select('participant_id')
             .eq('item_id', item.id);
+
+          const participantsDetails = (itemParticipants || [])
+            .map((ip: any) => data.account_participants.find((ap: any) => ap.id === ip.participant_id))
+            .filter(Boolean);
 
           return {
             ...item,
-            participants: itemParticipants?.map(ip => ip.account_participants).filter(Boolean) || []
+            participants: participantsDetails
           };
         })
       )
