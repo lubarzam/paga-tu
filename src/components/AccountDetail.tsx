@@ -16,6 +16,9 @@ const AccountDetail = () => {
   const { user } = useAuth();
   const [account, setAccount] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [sendingReminder, setSendingReminder] = useState(false);
+  const [showMarkPaidDialog, setShowMarkPaidDialog] = useState(false);
+  const [selectedParticipant, setSelectedParticipant] = useState("");
 
   useEffect(() => {
     if (id) {
@@ -38,6 +41,48 @@ const AccountDetail = () => {
       navigate('/dashboard');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSendReminder = async () => {
+    try {
+      setSendingReminder(true);
+      await accountService.sendReminder(id);
+      toast({
+        title: "Recordatorio enviado",
+        description: "Se han enviado recordatorios a todos los participantes",
+      });
+    } catch (error) {
+      console.error('Error sending reminder:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo enviar el recordatorio",
+        variant: "destructive",
+      });
+    } finally {
+      setSendingReminder(false);
+    }
+  };
+
+  const handleMarkAsPaid = async () => {
+    if (!selectedParticipant) return;
+    
+    try {
+      await accountService.markAsPaid(id, selectedParticipant);
+      toast({
+        title: "Marcado como pagado",
+        description: "El participante ha sido marcado como pagado",
+      });
+      setShowMarkPaidDialog(false);
+      setSelectedParticipant("");
+      loadAccount(); // Reload to show updated status
+    } catch (error) {
+      console.error('Error marking as paid:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo marcar como pagado",
+        variant: "destructive",
+      });
     }
   };
 
@@ -192,17 +237,65 @@ const AccountDetail = () => {
             <CardTitle>Acciones</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex gap-2">
-              <Button variant="outline">
-                Enviar recordatorio
+            <div className="flex gap-2 flex-wrap">
+              <Button 
+                variant="outline"
+                onClick={() => navigate(`/account/${id}/edit`)}
+              >
+                Editar cuenta
               </Button>
-              <Button variant="outline">
+              <Button 
+                variant="outline"
+                onClick={handleSendReminder}
+                disabled={sendingReminder}
+              >
+                {sendingReminder ? "Enviando..." : "Enviar recordatorio"}
+              </Button>
+              <Button 
+                variant="outline"
+                onClick={() => setShowMarkPaidDialog(true)}
+              >
                 Marcar como pagado
               </Button>
             </div>
           </CardContent>
         </Card>
       )}
+
+      {/* Mark as Paid Dialog */}
+      <AlertDialog open={showMarkPaidDialog} onOpenChange={setShowMarkPaidDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Marcar como pagado</AlertDialogTitle>
+            <AlertDialogDescription>
+              Selecciona el participante que ya ha realizado el pago:
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="py-4">
+            <Select value={selectedParticipant} onValueChange={setSelectedParticipant}>
+              <SelectTrigger>
+                <SelectValue placeholder="Seleccionar participante" />
+              </SelectTrigger>
+              <SelectContent>
+                {account?.account_participants?.map((participant) => (
+                  <SelectItem key={participant.id} value={participant.id}>
+                    {participant.name || participant.email} - ${participant.total_amount?.toLocaleString() || '0'}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleMarkAsPaid}
+              disabled={!selectedParticipant}
+            >
+              Marcar como pagado
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

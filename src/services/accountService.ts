@@ -160,6 +160,82 @@ export const accountService = {
     return unique;
   },
 
+  async updateAccount(id: string, data: {
+    name: string;
+    description?: string;
+    items: Array<{ id?: string; name: string; amount: number; participants?: string[] }>;
+    participants: Array<{ id?: string; email: string; name?: string }>;
+    tipIncluded: boolean;
+    tipAmount?: number;
+  }) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Usuario no autenticado');
+
+    // Calculate totals
+    const subtotal = data.items.reduce((sum, item) => sum + item.amount, 0);
+    const tipAmount = data.tipAmount || 0;
+    const total = subtotal + tipAmount;
+
+    // Update account
+    const { error: accountError } = await supabase
+      .from('accounts')
+      .update({
+        name: data.name,
+        description: data.description,
+        subtotal,
+        tip_amount: tipAmount,
+        tip_included: data.tipIncluded,
+        total,
+      })
+      .eq('id', id);
+
+    if (accountError) throw accountError;
+
+    // Update items (simple approach - delete all and recreate)
+    await supabase.from('account_items').delete().eq('account_id', id);
+    
+    if (data.items.length > 0) {
+      const itemsToInsert = data.items.map(item => ({
+        account_id: id,
+        name: item.name,
+        amount: item.amount,
+      }));
+
+      const { error: itemsError } = await supabase
+        .from('account_items')
+        .insert(itemsToInsert);
+
+      if (itemsError) throw itemsError;
+    }
+
+    // Recalculate participant totals
+    await supabase.rpc('calculate_participant_totals', {
+      p_account_id: id
+    });
+
+    return { id };
+  },
+
+  async sendReminder(accountId: string) {
+    const { data, error } = await supabase.functions.invoke('send-reminder', {
+      body: { accountId }
+    });
+
+    if (error) throw error;
+    return data;
+  },
+
+  async markAsPaid(accountId: string, participantId: string) {
+    const { error } = await supabase
+      .from('account_participants')
+      .update({ paid: true })
+      .eq('account_id', accountId)
+      .eq('id', participantId);
+
+    if (error) throw error;
+    return { success: true };
+  },
+
   async acceptInvitation(token: string) {
     const { data, error } = await supabase.rpc('accept_invitation', {
       p_token: token
