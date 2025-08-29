@@ -175,13 +175,13 @@ export const accountService = {
             .from('item_participants')
             .select(`
               participant_id,
-              account_participants!inner(name, email)
+              account_participants(name, email, is_registered)
             `)
             .eq('item_id', item.id);
 
           return {
             ...item,
-            participants: itemParticipants?.map(ip => ip.account_participants) || []
+            participants: itemParticipants?.map(ip => ip.account_participants).filter(Boolean) || []
           };
         })
       )
