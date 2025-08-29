@@ -129,17 +129,35 @@ export const accountService = {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('Usuario no autenticado');
 
-    const { data, error } = await supabase
+    // Fetch accounts the user owns
+    const { data: owned, error: ownedError } = await supabase
       .from('accounts')
-      .select(`
-        *,
-        account_participants!inner (participant_id)
-      `)
-      .or(`owner_id.eq.${user.id},account_participants.participant_id.eq.${user.id}`)
+      .select('*')
+      .eq('owner_id', user.id)
       .order('created_at', { ascending: false });
 
-    if (error) throw error;
-    return data;
+    // Fetch accounts where the user is a participant via a safe join from account_participants
+    const { data: participantRows, error: participantError } = await supabase
+      .from('account_participants')
+      .select('account_id, accounts:account_id(*)')
+      .eq('participant_id', user.id);
+
+    if (ownedError && participantError) {
+      // If both queries failed, surface the ownedError by default
+      throw ownedError;
+    }
+
+    const participating = (participantRows || [])
+      .map((r: any) => r.accounts)
+      .filter(Boolean);
+
+    const all = [...(owned || []), ...participating];
+    // De-duplicate by account id
+    const unique = Array.from(new Map(all.map((a: any) => [a.id, a])).values());
+
+    // Sort by created_at desc
+    unique.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    return unique;
   },
 
   async acceptInvitation(token: string) {
