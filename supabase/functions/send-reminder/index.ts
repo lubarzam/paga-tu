@@ -74,9 +74,11 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Account owner not found");
     }
 
-    // Send reminder emails to all participants
-    const emailPromises = account.account_participants.map(async (participant: any) => {
+    // Send reminder emails to all participants (sequentially to avoid rate limits)
+    const results = [];
+    for (const participant of account.account_participants) {
       try {
+        console.log(`Sending reminder to ${participant.email}`);
         const emailResponse = await resend.emails.send({
           from: "PagaTu <recordatorios@pagatu.app>",
           to: [participant.email],
@@ -108,14 +110,17 @@ const handler = async (req: Request): Promise<Response> => {
         });
 
         console.log(`Reminder sent to ${participant.email}:`, emailResponse);
-        return { success: true, email: participant.email };
+        results.push({ success: true, email: participant.email });
+        
+        // Add delay between emails to respect rate limits (500ms = 2 requests per second)
+        if (account.account_participants.indexOf(participant) < account.account_participants.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
       } catch (error) {
         console.error(`Error sending reminder to ${participant.email}:`, error);
-        return { success: false, email: participant.email, error: error.message };
+        results.push({ success: false, email: participant.email, error: error.message });
       }
-    });
-
-    const results = await Promise.all(emailPromises);
+    }
     const successful = results.filter(r => r.success);
     const failed = results.filter(r => !r.success);
 
