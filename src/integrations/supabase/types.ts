@@ -324,6 +324,10 @@ export type Database = {
         Args: { p_email: string; p_name?: string }
         Returns: string
       }
+      is_account_co_participant: {
+        Args: { _account_id: string }
+        Returns: boolean
+      }
       link_registered_participants: {
         Args: { p_account_id: string }
         Returns: undefined
