@@ -11,17 +11,18 @@ const corsHeaders = {
 };
 
 const handler = async (req: Request): Promise<Response> => {
+  console.log('Function called with method:', req.method);
+  
   // Handle CORS preflight requests first
   if (req.method === "OPTIONS") {
-    const reqHeaders = req.headers.get('Access-Control-Request-Headers') ?? corsHeaders["Access-Control-Allow-Headers"];
+    console.log('Handling OPTIONS request');
     return new Response(null, { 
       status: 200,
-      headers: { 
-        ...corsHeaders,
-        "Access-Control-Allow-Headers": reqHeaders,
-      }
+      headers: corsHeaders 
     });
   }
+
+  console.log('Processing request...');
 
   try {
     const { accountId } = await req.json();
