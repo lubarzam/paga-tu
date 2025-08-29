@@ -151,7 +151,29 @@ export const accountService = {
       .single();
 
     if (error) throw error;
-    return data;
+    
+    // Get item participants for each item
+    const accountWithItemParticipants = {
+      ...data,
+      account_items: await Promise.all(
+        data.account_items.map(async (item: any) => {
+          const { data: itemParticipants } = await supabase
+            .from('item_participants')
+            .select(`
+              participant_id,
+              account_participants!inner(name, email)
+            `)
+            .eq('item_id', item.id);
+
+          return {
+            ...item,
+            participants: itemParticipants?.map(ip => ip.account_participants) || []
+          };
+        })
+      )
+    };
+
+    return accountWithItemParticipants;
   },
 
   async getUserAccounts() {
@@ -172,7 +194,6 @@ export const accountService = {
       .eq('participant_id', user.id);
 
     if (ownedError && participantError) {
-      // If both queries failed, surface the ownedError by default
       throw ownedError;
     }
 
@@ -184,9 +205,36 @@ export const accountService = {
     // De-duplicate by account id
     const unique = Array.from(new Map(all.map((a: any) => [a.id, a])).values());
 
+    // Calculate status and participant count for each account
+    const accountsWithStatus = await Promise.all(
+      unique.map(async (account: any) => {
+        const { data: participants } = await supabase
+          .from('account_participants')
+          .select('paid')
+          .eq('account_id', account.id);
+
+        const totalParticipants = participants?.length || 0;
+        const paidParticipants = participants?.filter(p => p.paid).length || 0;
+
+        let status = 'pending';
+        if (paidParticipants === totalParticipants && totalParticipants > 0) {
+          status = 'paid';
+        } else if (paidParticipants > 0) {
+          status = 'partial';
+        }
+
+        return {
+          ...account,
+          participant_count: totalParticipants,
+          paid_count: paidParticipants,
+          status
+        };
+      })
+    );
+
     // Sort by created_at desc
-    unique.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-    return unique;
+    accountsWithStatus.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    return accountsWithStatus;
   },
 
   async updateAccount(id: string, data: {
@@ -272,5 +320,29 @@ export const accountService = {
 
     if (error) throw error;
     return data;
+  },
+
+  async deleteAccount(id: string) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Usuario no autenticado');
+
+    // Verify user is the owner
+    const { data: account } = await supabase
+      .from('accounts')
+      .select('owner_id')
+      .eq('id', id)
+      .single();
+
+    if (!account || account.owner_id !== user.id) {
+      throw new Error('No tienes permisos para eliminar esta cuenta');
+    }
+
+    // Delete account (cascading will handle related tables)
+    const { error } = await supabase
+      .from('accounts')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
   }
 };

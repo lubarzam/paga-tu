@@ -147,27 +147,36 @@ const Dashboard = () => {
                   onClick={() => handleAccountClick(account.id)}
                 >
                   <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h3 className="font-semibold">{account.name}</h3>
-                          <Badge variant="default">
-                            Activa
-                          </Badge>
-                        </div>
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                          <span>{new Date(account.created_at).toLocaleDateString()}</span>
-                          <div className="flex items-center gap-1">
-                            <Users className="h-3 w-3" />
-                            {account.account_participants?.length || 0} personas
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-semibold text-lg">${account.total?.toLocaleString()}</p>
-                        <p className="text-sm text-muted-foreground">Total</p>
-                      </div>
-                    </div>
+                     <div className="flex items-center justify-between">
+                       <div className="flex-1">
+                         <div className="flex items-center gap-2 mb-2">
+                           <h3 className="font-semibold">{account.name}</h3>
+                           <Badge variant={
+                             account.status === 'paid' ? 'default' : 
+                             account.status === 'partial' ? 'secondary' : 
+                             'destructive'
+                           }>
+                             {account.status === 'paid' ? 'Pagado' : 
+                              account.status === 'partial' ? 'Pagado parcialmente' : 
+                              'Pendiente de pago'}
+                           </Badge>
+                         </div>
+                         <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                           <span>{new Date(account.created_at).toLocaleDateString()}</span>
+                           <div className="flex items-center gap-1">
+                             <Users className="h-3 w-3" />
+                             {account.participant_count || 0} personas
+                           </div>
+                           {account.status === 'partial' && (
+                             <span>{account.paid_count}/{account.participant_count} pagaron</span>
+                           )}
+                         </div>
+                       </div>
+                       <div className="text-right">
+                         <p className="font-semibold text-lg">${account.total?.toLocaleString()}</p>
+                         <p className="text-sm text-muted-foreground">Total</p>
+                       </div>
+                     </div>
                   </CardContent>
                 </Card>
               ))

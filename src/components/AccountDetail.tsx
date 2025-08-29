@@ -20,6 +20,7 @@ const AccountDetail = () => {
   const [loading, setLoading] = useState(true);
   const [sendingReminder, setSendingReminder] = useState(false);
   const [showMarkPaidDialog, setShowMarkPaidDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedParticipant, setSelectedParticipant] = useState("");
 
   useEffect(() => {
@@ -82,6 +83,24 @@ const AccountDetail = () => {
       toast({
         title: "Error",
         description: "No se pudo marcar como pagado",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      await accountService.deleteAccount(id);
+      toast({
+        title: "Cuenta eliminada",
+        description: "La cuenta ha sido eliminada exitosamente",
+      });
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar la cuenta",
         variant: "destructive",
       });
     }
@@ -183,19 +202,35 @@ const AccountDetail = () => {
           <CardHeader>
             <CardTitle>Artículos consumidos</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {account.account_items?.map((item, index) => (
-                <div key={index} className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
-                  <span className="font-medium">{item.name}</span>
-                  <span className="font-semibold">${item.amount?.toLocaleString()}</span>
-                </div>
-              ))}
-              {(!account.account_items || account.account_items.length === 0) && (
-                <p className="text-muted-foreground text-center py-4">No hay artículos registrados</p>
-              )}
-            </div>
-          </CardContent>
+           <CardContent>
+             <div className="space-y-3">
+               {account.account_items?.map((item, index) => (
+                 <div key={index} className="p-3 bg-muted/50 rounded-lg">
+                   <div className="flex justify-between items-start">
+                     <div className="flex-1">
+                       <span className="font-medium">{item.name}</span>
+                       {item.participants && item.participants.length > 0 && (
+                         <div className="mt-1">
+                           <p className="text-xs text-muted-foreground mb-1">Participantes:</p>
+                           <div className="flex flex-wrap gap-1">
+                             {item.participants.map((participant, pIndex) => (
+                               <Badge key={pIndex} variant="outline" className="text-xs">
+                                 {participant.name || participant.email}
+                               </Badge>
+                             ))}
+                           </div>
+                         </div>
+                       )}
+                     </div>
+                     <span className="font-semibold ml-4">${item.amount?.toLocaleString()}</span>
+                   </div>
+                 </div>
+               ))}
+               {(!account.account_items || account.account_items.length === 0) && (
+                 <p className="text-muted-foreground text-center py-4">No hay artículos registrados</p>
+               )}
+             </div>
+           </CardContent>
         </Card>
 
         {/* Participants */}
@@ -237,29 +272,35 @@ const AccountDetail = () => {
           <CardHeader>
             <CardTitle>Acciones</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="flex gap-2 flex-wrap">
-              <Button 
-                variant="outline"
-                onClick={() => navigate(`/account/${id}/edit`)}
-              >
-                Editar cuenta
-              </Button>
-              <Button 
-                variant="outline"
-                onClick={handleSendReminder}
-                disabled={sendingReminder}
-              >
-                {sendingReminder ? "Enviando..." : "Enviar recordatorio"}
-              </Button>
-              <Button 
-                variant="outline"
-                onClick={() => setShowMarkPaidDialog(true)}
-              >
-                Marcar como pagado
-              </Button>
-            </div>
-          </CardContent>
+           <CardContent>
+             <div className="flex gap-2 flex-wrap">
+               <Button 
+                 variant="outline"
+                 onClick={() => navigate(`/account/${id}/edit`)}
+               >
+                 Editar cuenta
+               </Button>
+               <Button 
+                 variant="outline"
+                 onClick={handleSendReminder}
+                 disabled={sendingReminder}
+               >
+                 {sendingReminder ? "Enviando..." : "Enviar recordatorio"}
+               </Button>
+               <Button 
+                 variant="outline"
+                 onClick={() => setShowMarkPaidDialog(true)}
+               >
+                 Marcar como pagado
+               </Button>
+               <Button 
+                 variant="destructive"
+                 onClick={() => setShowDeleteDialog(true)}
+               >
+                 Eliminar cuenta
+               </Button>
+             </div>
+           </CardContent>
         </Card>
       )}
 
@@ -293,6 +334,28 @@ const AccountDetail = () => {
               disabled={!selectedParticipant}
             >
               Marcar como pagado
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Account Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar cuenta?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. Se eliminará permanentemente la cuenta 
+              "{account?.name}" y todos sus datos asociados.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteAccount}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              Eliminar cuenta
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
