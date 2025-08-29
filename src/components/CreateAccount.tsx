@@ -36,7 +36,7 @@ const CreateAccount = () => {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [newParticipantName, setNewParticipantName] = useState("");
   const [newParticipantEmail, setNewParticipantEmail] = useState("");
-  const [selectedParticipants, setSelectedParticipants] = useState<string[]>(["Tu"]);
+  const [selectedParticipants, setSelectedParticipants] = useState<string[]>([]);
   const [frequentContacts, setFrequentContacts] = useState<FrequentContact[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredSuggestions, setFilteredSuggestions] = useState<FrequentContact[]>([]);
@@ -171,7 +171,7 @@ const CreateAccount = () => {
       };
       setItems([...items, newItem]);
       setCurrentItem({ name: "", amount: "" });
-      setSelectedParticipants(["Tu"]);
+      setSelectedParticipants([]);
     }
   };
 

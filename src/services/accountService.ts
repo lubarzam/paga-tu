@@ -35,13 +35,31 @@ export const accountService = {
 
     if (accountError) throw accountError;
 
-    // Create participants
-    const participantsToInsert = data.participants.map(p => ({
-      account_id: account.id,
-      email: p.email,
-      name: p.name,
-      is_registered: false,
-    }));
+    // Get current user profile
+    const { data: userProfile } = await supabase
+      .from('profiles')
+      .select('name, email')
+      .eq('id', user.id)
+      .single();
+
+    // Create participants (including the owner)
+    const participantsToInsert = [
+      // Add the owner as a participant
+      {
+        account_id: account.id,
+        participant_id: user.id,
+        email: userProfile?.email || user.email,
+        name: userProfile?.name || 'Tu',
+        is_registered: true,
+      },
+      // Add other participants
+      ...data.participants.map(p => ({
+        account_id: account.id,
+        email: p.email,
+        name: p.name,
+        is_registered: false,
+      }))
+    ];
 
     const { data: participants, error: participantsError } = await supabase
       .from('account_participants')
@@ -66,12 +84,23 @@ export const accountService = {
 
     // Create item-participant relationships
     const itemParticipants = [];
+    const ownerParticipant = participants.find(p => p.participant_id === user.id);
+
     for (let i = 0; i < data.items.length; i++) {
       const item = createdItems[i];
-      const participantEmails = data.items[i].participants;
+      const participantNames = data.items[i].participants;
       
-      for (const email of participantEmails) {
-        const participant = participants.find(p => p.email === email);
+      for (const participantName of participantNames) {
+        let participant;
+        
+        if (participantName === "Tu") {
+          // Use owner participant
+          participant = ownerParticipant;
+        } else {
+          // Find participant by name
+          participant = participants.find(p => p.name === participantName);
+        }
+        
         if (participant) {
           itemParticipants.push({
             item_id: item.id,
