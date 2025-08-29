@@ -113,7 +113,7 @@ export const accountService = {
         if (participant) {
           itemParticipants.push({
             item_id: item.id,
-            participant_id: participant.participant_id || participant.id, // Use actual participant_id for registered users
+            participant_id: participant.id, // Use account_participants.id
           });
         }
       }
