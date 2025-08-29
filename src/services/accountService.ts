@@ -201,19 +201,28 @@ export const accountService = {
       .eq('owner_id', user.id)
       .order('created_at', { ascending: false });
 
-    // Fetch accounts where the user is a participant via a safe join from account_participants
+    // Fetch accounts where the user is a participant 
     const { data: participantRows, error: participantError } = await supabase
       .from('account_participants')
-      .select('account_id, accounts:account_id(*)')
+      .select('account_id')
       .eq('participant_id', user.id);
 
     if (ownedError && participantError) {
       throw ownedError;
     }
 
-    const participating = (participantRows || [])
-      .map((r: any) => r.accounts)
-      .filter(Boolean);
+    // Get full account details for participating accounts
+    let participating = [];
+    if (participantRows && participantRows.length > 0) {
+      const accountIds = participantRows.map(r => r.account_id);
+      const { data: participatingAccounts } = await supabase
+        .from('accounts')
+        .select('*')
+        .in('id', accountIds)
+        .neq('owner_id', user.id); // Exclude accounts I own
+      
+      participating = participatingAccounts || [];
+    }
 
     const all = [...(owned || []), ...participating];
     // De-duplicate by account id
