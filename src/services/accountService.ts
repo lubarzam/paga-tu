@@ -231,11 +231,18 @@ export const accountService = {
         .select('*')
         .in('id', accountIds);
       
+      
       console.log('DEBUG SERVICE: All participating accounts before filter:', allParticipatingAccounts);
+      console.log('DEBUG SERVICE: All participating accounts details:', allParticipatingAccounts?.map(a => ({ id: a.id, name: a.name, owner_id: a.owner_id })));
+      console.log('DEBUG SERVICE: Current user id:', user.id);
       console.log('DEBUG SERVICE: Participating error:', participatingError);
       
       // Then filter out accounts I own in JavaScript
-      participating = (allParticipatingAccounts || []).filter(account => account.owner_id !== user.id);
+      participating = (allParticipatingAccounts || []).filter(account => {
+        const isNotOwner = account.owner_id !== user.id;
+        console.log(`DEBUG SERVICE: Account ${account.name} (${account.id}) - owner: ${account.owner_id}, isNotOwner: ${isNotOwner}`);
+        return isNotOwner;
+      });
       console.log('DEBUG SERVICE: Participating accounts after filter:', participating);
     }
 
