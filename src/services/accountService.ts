@@ -66,6 +66,7 @@ export const accountService = {
         email: p.email,
         name: p.name,
         is_registered: false,
+        participant_id: null, // Will be filled when user registers
       }))
     ];
 
