@@ -80,7 +80,7 @@ const handler = async (req: Request): Promise<Response> => {
       try {
         console.log(`Sending reminder to ${participant.email}`);
         const emailResponse = await resend.emails.send({
-          from: "PagaTu <recordatorios@pagatu.app>",
+          from: "PagaTu <onboarding@resend.dev>",
           to: [participant.email],
           subject: `Recordatorio: Pendiente de pago en "${account.name}"`,
           html: `
