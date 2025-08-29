@@ -38,6 +38,7 @@ export interface AccountParticipant {
   name?: string;
   is_registered: boolean;
   total_amount: number;
+  paid: boolean;
   created_at: string;
 }
 

@@ -54,6 +54,7 @@ export type Database = {
           id: string
           is_registered: boolean | null
           name: string | null
+          paid: boolean | null
           participant_id: string | null
           total_amount: number | null
         }
@@ -64,6 +65,7 @@ export type Database = {
           id?: string
           is_registered?: boolean | null
           name?: string | null
+          paid?: boolean | null
           participant_id?: string | null
           total_amount?: number | null
         }
@@ -74,6 +76,7 @@ export type Database = {
           id?: string
           is_registered?: boolean | null
           name?: string | null
+          paid?: boolean | null
           participant_id?: string | null
           total_amount?: number | null
         }
