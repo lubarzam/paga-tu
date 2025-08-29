@@ -229,7 +229,7 @@ export const accountService = {
         .from('accounts')
         .select('*')
         .in('id', accountIds)
-        .neq('owner_id', user.id); // Exclude accounts I own
+        .filter('owner_id', 'neq', user.id); // Use filter instead of neq
       
       console.log('DEBUG SERVICE: Participating accounts:', participatingAccounts);
       console.log('DEBUG SERVICE: Participating error:', participatingError);
