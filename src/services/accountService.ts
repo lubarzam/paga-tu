@@ -194,6 +194,8 @@ export const accountService = {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('Usuario no autenticado');
 
+    console.log('DEBUG SERVICE: User ID:', user.id);
+
     // Fetch accounts the user owns
     const { data: owned, error: ownedError } = await supabase
       .from('accounts')
@@ -201,11 +203,17 @@ export const accountService = {
       .eq('owner_id', user.id)
       .order('created_at', { ascending: false });
 
+    console.log('DEBUG SERVICE: Owned accounts:', owned);
+    console.log('DEBUG SERVICE: Owned error:', ownedError);
+
     // Fetch accounts where the user is a participant 
     const { data: participantRows, error: participantError } = await supabase
       .from('account_participants')
       .select('account_id')
       .eq('participant_id', user.id);
+
+    console.log('DEBUG SERVICE: Participant rows:', participantRows);
+    console.log('DEBUG SERVICE: Participant error:', participantError);
 
     if (ownedError && participantError) {
       throw ownedError;
@@ -215,11 +223,16 @@ export const accountService = {
     let participating = [];
     if (participantRows && participantRows.length > 0) {
       const accountIds = participantRows.map(r => r.account_id);
-      const { data: participatingAccounts } = await supabase
+      console.log('DEBUG SERVICE: Account IDs to fetch:', accountIds);
+      
+      const { data: participatingAccounts, error: participatingError } = await supabase
         .from('accounts')
         .select('*')
         .in('id', accountIds)
         .neq('owner_id', user.id); // Exclude accounts I own
+      
+      console.log('DEBUG SERVICE: Participating accounts:', participatingAccounts);
+      console.log('DEBUG SERVICE: Participating error:', participatingError);
       
       participating = participatingAccounts || [];
     }
