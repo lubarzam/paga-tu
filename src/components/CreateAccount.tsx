@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Plus, X, Users, Calculator, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { accountService } from "@/services/accountService";
 
 interface Item {
   id: number;
@@ -18,15 +21,24 @@ interface Item {
 
 const CreateAccount = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { user, loading } = useAuth();
   const [accountName, setAccountName] = useState("");
   const [description, setDescription] = useState("");
   const [items, setItems] = useState<Item[]>([]);
   const [currentItem, setCurrentItem] = useState({ name: "", amount: "" });
-  const [participants, setParticipants] = useState(["Tu", "Invitado 1"]);
+  const [participants, setParticipants] = useState<string[]>([]);
   const [newParticipant, setNewParticipant] = useState("");
-  const [selectedParticipants, setSelectedParticipants] = useState<string[]>(["Tu"]);
+  const [selectedParticipants, setSelectedParticipants] = useState<string[]>([]);
   const [tip, setTip] = useState("");
   const [tipIncluded, setTipIncluded] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate('/');
+    }
+  }, [user, loading, navigate]);
 
   const addParticipant = () => {
     if (newParticipant && !participants.includes(newParticipant)) {
@@ -117,28 +129,73 @@ const CreateAccount = () => {
     return total;
   };
 
-  const handleCreateAccount = () => {
-    if (!accountName || items.length === 0) {
+  const handleCreateAccount = async () => {
+    if (!accountName.trim()) {
       toast({
         title: "Error",
-        description: "Debes agregar un nombre y al menos un ítem a la cuenta",
+        description: "El nombre de la cuenta es obligatorio",
         variant: "destructive",
       });
       return;
     }
 
-    // Aquí se integraría con Supabase para guardar la cuenta
-    toast({
-      title: "¡Cuenta creada exitosamente!",
-      description: `La cuenta "${accountName}" ha sido guardada con ${items.length} ítems`,
-    });
+    if (items.length === 0) {
+      toast({
+        title: "Error",
+        description: "Debes agregar al menos un ítem",
+        variant: "destructive",
+      });
+      return;
+    }
 
-    // Reset del formulario
-    setAccountName("");
-    setDescription("");
-    setItems([]);
-    setTip("");
-    setTipIncluded(false);
+    if (participants.length === 0) {
+      toast({
+        title: "Error",
+        description: "Debes agregar al menos un participante",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      
+      // Preparar datos para envío
+      const accountData = {
+        name: accountName,
+        description: description || undefined,
+        items: items.map(item => ({
+          name: item.name,
+          amount: item.amount,
+          participants: item.participants,
+        })),
+        participants: participants.map(email => ({
+          email,
+          name: email.split('@')[0], // Usar parte antes del @ como nombre temporal
+        })),
+        tipIncluded,
+        tipAmount: tipIncluded ? (tip ? parseFloat(tip) : calculateSuggestedTip()) : 0,
+      };
+
+      const createdAccount = await accountService.createAccount(accountData);
+      
+      toast({
+        title: "Cuenta creada",
+        description: `La cuenta "${accountName}" ha sido creada exitosamente y se han enviado las invitaciones`,
+      });
+
+      // Redirigir al detalle de la cuenta creada
+      navigate(`/account/${createdAccount.id}`);
+    } catch (error) {
+      console.error('Error creating account:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo crear la cuenta. Intenta nuevamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -401,10 +458,10 @@ const CreateAccount = () => {
           <Button 
             className="w-full" 
             size="lg"
-            disabled={!accountName || items.length === 0}
+            disabled={!accountName || items.length === 0 || participants.length === 0 || isSubmitting}
             onClick={handleCreateAccount}
           >
-            Crear cuenta
+            {isSubmitting ? "Creando cuenta..." : "Crear cuenta"}
           </Button>
         </div>
       </div>

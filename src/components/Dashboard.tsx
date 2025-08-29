@@ -1,92 +1,110 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
 import { CreditCard, Receipt, Users, TrendingUp, Clock, CheckCircle } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { accountService } from "@/services/accountService";
+import { toast } from "@/hooks/use-toast";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  // Mock data - En producción vendría de la API
-  const [paidAccounts] = useState([
-    {
-      id: 1,
-      name: "Cena El Parrillón",
-      date: "2024-01-15",
-      total: 45000,
-      participants: 4,
-      status: "pending",
-      owedAmount: 32000
-    },
-    {
-      id: 2,
-      name: "Almuerzo Café Central",
-      date: "2024-01-12",
-      total: 28000,
-      participants: 3,
-      status: "completed",
-      owedAmount: 0
-    }
-  ]);
+  const { user, loading: authLoading } = useAuth();
+  const [accounts, setAccounts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const [owedAccounts] = useState([
-    {
-      id: 3,
-      name: "Cine y Palomitas",
-      date: "2024-01-14",
-      total: 22000,
-      myShare: 7500,
-      paidBy: "María González",
-      status: "pending"
-    },
-    {
-      id: 4,
-      name: "Pizza con amigos",
-      date: "2024-01-10",
-      total: 35000,
-      myShare: 8750,
-      paidBy: "Carlos Ruiz",
-      status: "paid"
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate('/');
+      return;
     }
-  ]);
+
+    if (user) {
+      loadAccounts();
+    }
+  }, [user, authLoading, navigate]);
+
+  const loadAccounts = async () => {
+    try {
+      setLoading(true);
+      const data = await accountService.getUserAccounts();
+      setAccounts(data || []);
+    } catch (error) {
+      console.error('Error loading accounts:', error);
+      toast({
+        title: "Error",
+        description: "No se pudieron cargar las cuentas",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAccountClick = (accountId: string) => {
+    navigate(`/account/${accountId}`);
+  };
+
+  if (authLoading || loading) {
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[...Array(3)].map((_, i) => (
+            <Skeleton key={i} className="h-24" />
+          ))}
+        </div>
+        <Skeleton className="h-96" />
+      </div>
+    );
+  }
+
+  // Separar cuentas propias y participaciones
+  const ownAccounts = accounts.filter(account => account.owner_id === user?.id);
+  const participantAccounts = accounts.filter(account => account.owner_id !== user?.id);
 
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="bg-gradient-to-br from-primary to-primary-glow text-primary-foreground">
+        <Card className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-primary-foreground/80 text-sm">Total por cobrar</p>
-                <p className="text-2xl font-bold">$32.000</p>
+                <p className="text-2xl font-bold">
+                  ${ownAccounts.reduce((sum, acc) => sum + (acc.total || 0), 0).toLocaleString()}
+                </p>
               </div>
               <TrendingUp className="h-8 w-8 text-primary-foreground/80" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-warning to-orange-400 text-warning-foreground">
+        <Card className="bg-gradient-to-br from-orange-400 to-orange-500 text-white">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-warning-foreground/80 text-sm">Total por pagar</p>
-                <p className="text-2xl font-bold">$7.500</p>
+                <p className="text-white/80 text-sm">Total por pagar</p>
+                <p className="text-2xl font-bold">
+                  ${participantAccounts.reduce((sum, acc) => sum + (acc.total || 0), 0).toLocaleString()}
+                </p>
               </div>
-              <Clock className="h-8 w-8 text-warning-foreground/80" />
+              <Clock className="h-8 w-8 text-white/80" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-success to-emerald-500 text-success-foreground">
+        <Card className="bg-gradient-to-br from-green-400 to-green-500 text-white">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-success-foreground/80 text-sm">Pagos completados</p>
-                <p className="text-2xl font-bold">3</p>
+                <p className="text-white/80 text-sm">Cuentas totales</p>
+                <p className="text-2xl font-bold">{accounts.length}</p>
               </div>
-              <CheckCircle className="h-8 w-8 text-success-foreground/80" />
+              <CheckCircle className="h-8 w-8 text-white/80" />
             </div>
           </CardContent>
         </Card>
@@ -97,11 +115,11 @@ const Dashboard = () => {
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="paid" className="flex items-center gap-2">
             <CreditCard className="h-4 w-4" />
-            Cuentas que pagué
+            Cuentas que pagué ({ownAccounts.length})
           </TabsTrigger>
           <TabsTrigger value="owed" className="flex items-center gap-2">
             <Receipt className="h-4 w-4" />
-            Debo pagar
+            Debo pagar ({participantAccounts.length})
           </TabsTrigger>
         </TabsList>
 
@@ -112,37 +130,48 @@ const Dashboard = () => {
           </div>
           
           <div className="space-y-3">
-            {paidAccounts.map((account) => (
-              <Card key={account.id} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h3 className="font-semibold">{account.name}</h3>
-                        <Badge variant={account.status === 'completed' ? 'default' : 'secondary'}>
-                          {account.status === 'completed' ? 'Completado' : 'Pendiente'}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <span>{account.date}</span>
-                        <div className="flex items-center gap-1">
-                          <Users className="h-3 w-3" />
-                          {account.participants} personas
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-lg">${account.total.toLocaleString()}</p>
-                      {account.owedAmount > 0 && (
-                        <p className="text-sm text-warning">
-                          Pendiente: ${account.owedAmount.toLocaleString()}
-                        </p>
-                      )}
-                    </div>
-                  </div>
+            {ownAccounts.length === 0 ? (
+              <Card className="p-8 text-center">
+                <CardContent>
+                  <p className="text-muted-foreground mb-4">No has creado ninguna cuenta aún</p>
+                  <Button onClick={() => navigate('/create')}>
+                    Crear mi primera cuenta
+                  </Button>
                 </CardContent>
               </Card>
-            ))}
+            ) : (
+              ownAccounts.map((account) => (
+                <Card 
+                  key={account.id} 
+                  className="hover:shadow-md transition-shadow cursor-pointer"
+                  onClick={() => handleAccountClick(account.id)}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h3 className="font-semibold">{account.name}</h3>
+                          <Badge variant="default">
+                            Activa
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <span>{new Date(account.created_at).toLocaleDateString()}</span>
+                          <div className="flex items-center gap-1">
+                            <Users className="h-3 w-3" />
+                            {account.account_participants?.length || 0} personas
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-lg">${account.total?.toLocaleString()}</p>
+                        <p className="text-sm text-muted-foreground">Total</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
           </div>
         </TabsContent>
 
@@ -150,37 +179,44 @@ const Dashboard = () => {
           <h2 className="text-lg font-semibold">Cuentas donde debo pagar</h2>
           
           <div className="space-y-3">
-            {owedAccounts.map((account) => (
-              <Card key={account.id} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h3 className="font-semibold">{account.name}</h3>
-                        <Badge variant={account.status === 'paid' ? 'default' : 'destructive'}>
-                          {account.status === 'paid' ? 'Pagado' : 'Pendiente'}
-                        </Badge>
-                      </div>
-                      <div className="flex flex-col gap-1 text-sm text-muted-foreground">
-                        <span>{account.date}</span>
-                        <span>Pagado por: {account.paidBy}</span>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-lg">${account.myShare.toLocaleString()}</p>
-                      <p className="text-xs text-muted-foreground">
-                        Total: ${account.total.toLocaleString()}
-                      </p>
-                      {account.status === 'pending' && (
-                        <Button size="sm" className="mt-2">
-                          Marcar como pagado
-                        </Button>
-                      )}
-                    </div>
-                  </div>
+            {participantAccounts.length === 0 ? (
+              <Card className="p-8 text-center">
+                <CardContent>
+                  <p className="text-muted-foreground">No tienes cuentas pendientes por pagar</p>
                 </CardContent>
               </Card>
-            ))}
+            ) : (
+              participantAccounts.map((account) => (
+                <Card 
+                  key={account.id} 
+                  className="hover:shadow-md transition-shadow cursor-pointer"
+                  onClick={() => handleAccountClick(account.id)}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h3 className="font-semibold">{account.name}</h3>
+                          <Badge variant="secondary">
+                            Pendiente
+                          </Badge>
+                        </div>
+                        <div className="flex flex-col gap-1 text-sm text-muted-foreground">
+                          <span>{new Date(account.created_at).toLocaleDateString()}</span>
+                          <span>Pagado por: {account.profiles?.name || account.profiles?.email}</span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-lg">${account.total?.toLocaleString()}</p>
+                        <p className="text-xs text-muted-foreground">
+                          Mi parte: Calculando...
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
           </div>
         </TabsContent>
       </Tabs>

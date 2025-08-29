@@ -7,6 +7,7 @@ import LandingPage from "./components/LandingPage";
 import Layout from "./components/Layout";
 import Dashboard from "./components/Dashboard";
 import CreateAccount from "./components/CreateAccount";
+import AccountDetail from "./components/AccountDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,9 @@ const App = () => (
           </Route>
           <Route path="/create" element={<Layout />}>
             <Route index element={<CreateAccount />} />
+          </Route>
+          <Route path="/account/:id" element={<Layout />}>
+            <Route index element={<AccountDetail />} />
           </Route>
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

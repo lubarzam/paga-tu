@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { DollarSign, Calculator, Users, Bell, ArrowRight, Star } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 import heroImage from "@/assets/hero-banner.jpg";
 import featureSplit from "@/assets/feature-split.jpg";
 import featurePrecise from "@/assets/feature-precise.jpg";
@@ -9,6 +10,19 @@ import featureTrack from "@/assets/feature-track.jpg";
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  const { user, signInWithGoogle } = useAuth();
+
+  const handleAuthAction = async () => {
+    if (user) {
+      navigate('/dashboard');
+    } else {
+      try {
+        await signInWithGoogle();
+      } catch (error) {
+        console.error('Error signing in:', error);
+      }
+    }
+  };
 
   const features = [
     {
@@ -63,15 +77,23 @@ const LandingPage = () => {
           </div>
           
           <div className="flex items-center gap-2">
-            <Button 
-              variant="ghost" 
-              onClick={() => navigate('/dashboard')}
-            >
-              Iniciar Sesión
-            </Button>
-            <Button onClick={() => navigate('/dashboard')}>
-              Comenzar Gratis
-            </Button>
+            {user ? (
+              <Button onClick={() => navigate('/dashboard')}>
+                Dashboard
+              </Button>
+            ) : (
+              <>
+                <Button 
+                  variant="ghost" 
+                  onClick={handleAuthAction}
+                >
+                  Iniciar Sesión
+                </Button>
+                <Button onClick={handleAuthAction}>
+                  Comenzar Gratis
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -100,7 +122,7 @@ const LandingPage = () => {
                 <Button 
                   size="lg" 
                   className="text-lg px-8"
-                  onClick={() => navigate('/dashboard')}
+                  onClick={handleAuthAction}
                 >
                   Crear Mi Primera Cuenta
                   <ArrowRight className="ml-2 h-5 w-5" />
@@ -108,7 +130,7 @@ const LandingPage = () => {
                 <Button 
                   size="lg" 
                   variant="outline"
-                  onClick={() => navigate('/dashboard')}
+                  onClick={handleAuthAction}
                 >
                   Ver Demo
                 </Button>
@@ -255,7 +277,7 @@ const LandingPage = () => {
             <Button 
               size="lg" 
               className="text-lg px-8"
-              onClick={() => navigate('/dashboard')}
+              onClick={handleAuthAction}
             >
               Comenzar Ahora - Es Gratis
               <ArrowRight className="ml-2 h-5 w-5" />
