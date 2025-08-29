@@ -127,6 +127,11 @@ export const accountService = {
       if (itemParticipantsError) throw itemParticipantsError;
     }
 
+    // Link any existing registered participants
+    await supabase.rpc('link_registered_participants', {
+      p_account_id: account.id
+    });
+
     // Calculate participant totals
     await supabase.rpc('calculate_participant_totals', {
       p_account_id: account.id
