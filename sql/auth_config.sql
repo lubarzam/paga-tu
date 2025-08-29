@@ -23,9 +23,5 @@
 <p>Esta invitación expira en 7 días.</p>
 */
 
--- Additional email configuration for invitations
-INSERT INTO auth.config (parameter, value) VALUES
-('invite_auto_confirm', 'true'),
-('invite_template_subject', 'Te han invitado a dividir gastos'),
-('invite_template_body', '<h2>¡Hola!</h2><p>{{ .InviterName }} te ha invitado a participar en la cuenta "{{ .AccountName }}" para dividir gastos.</p><p><a href="{{ .ConfirmationURL }}">Aceptar invitación</a></p>')
-ON CONFLICT (parameter) DO UPDATE SET value = EXCLUDED.value;
+-- Email configuration is done through Supabase Dashboard
+-- Go to Authentication > Email Templates to customize invitation emails
