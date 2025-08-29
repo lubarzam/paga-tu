@@ -313,6 +313,10 @@ export type Database = {
         Args: { p_account_id: string }
         Returns: Json
       }
+      create_temporary_profile: {
+        Args: { p_email: string; p_name?: string }
+        Returns: string
+      }
       send_invitation_email: {
         Args: { p_account_id: string; p_email: string; p_name?: string }
         Returns: Json

@@ -42,6 +42,14 @@ export const accountService = {
       .eq('id', user.id)
       .single();
 
+    // Create temporary profiles for unregistered participants
+    for (const participant of data.participants) {
+      await supabase.rpc('create_temporary_profile', {
+        p_email: participant.email,
+        p_name: participant.name
+      });
+    }
+
     // Create participants (including the owner)
     const participantsToInsert = [
       // Add the owner as a participant
