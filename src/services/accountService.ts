@@ -1,5 +1,5 @@
-import { supabase } from '@/lib/supabase';
-import type { Account, AccountItem, AccountParticipant } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
+import type { Account, AccountItem, AccountParticipant } from '@/lib/types';
 
 export const accountService = {
   async createAccount(data: {
