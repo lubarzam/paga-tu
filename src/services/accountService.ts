@@ -225,16 +225,18 @@ export const accountService = {
       const accountIds = participantRows.map(r => r.account_id);
       console.log('DEBUG SERVICE: Account IDs to fetch:', accountIds);
       
-      const { data: participatingAccounts, error: participatingError } = await supabase
+      // First get all accounts
+      const { data: allParticipatingAccounts, error: participatingError } = await supabase
         .from('accounts')
         .select('*')
-        .in('id', accountIds)
-        .filter('owner_id', 'neq', user.id); // Use filter instead of neq
+        .in('id', accountIds);
       
-      console.log('DEBUG SERVICE: Participating accounts:', participatingAccounts);
+      console.log('DEBUG SERVICE: All participating accounts before filter:', allParticipatingAccounts);
       console.log('DEBUG SERVICE: Participating error:', participatingError);
       
-      participating = participatingAccounts || [];
+      // Then filter out accounts I own in JavaScript
+      participating = (allParticipatingAccounts || []).filter(account => account.owner_id !== user.id);
+      console.log('DEBUG SERVICE: Participating accounts after filter:', participating);
     }
 
     const all = [...(owned || []), ...participating];
