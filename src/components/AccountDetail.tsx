@@ -207,20 +207,27 @@ const AccountDetail = () => {
                {account.account_items?.map((item, index) => (
                  <div key={index} className="p-3 bg-muted/50 rounded-lg">
                    <div className="flex justify-between items-start">
-                     <div className="flex-1">
-                       <span className="font-medium">{item.name}</span>
-                       {item.participants && item.participants.length > 0 && (
-                         <div className="mt-1">
-                           <p className="text-xs text-muted-foreground mb-1">Participantes:</p>
-                           <div className="flex flex-wrap gap-1">
-                             {item.participants.map((participant, pIndex) => (
-                               <Badge key={pIndex} variant="outline" className="text-xs">
-                                 {participant.name || participant.email}
-                               </Badge>
-                             ))}
-                           </div>
-                         </div>
-                       )}
+                        <div className="flex-1">
+                        <span className="font-medium">{item.name}</span>
+                        {item.participants && item.participants.length > 0 && (
+                          <div className="mt-1">
+                            <p className="text-xs text-muted-foreground mb-1">Participantes:</p>
+                            <div className="flex flex-wrap gap-1">
+                              {item.participants.map((participant, pIndex) => {
+                                const isCurrentUser = participant.participant_id === user?.id;
+                                return (
+                                  <Badge 
+                                    key={pIndex} 
+                                    variant={isCurrentUser ? "default" : "outline"} 
+                                    className={`text-xs ${isCurrentUser ? "bg-primary text-primary-foreground font-semibold" : ""}`}
+                                  >
+                                    {participant.name || participant.email}
+                                  </Badge>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
                      </div>
                      <span className="font-semibold ml-4">${item.amount?.toLocaleString()}</span>
                    </div>
@@ -240,27 +247,42 @@ const AccountDetail = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {account.account_participants?.map((participant, index) => (
-                <div key={index} className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">
-                      {participant.name || participant.email}
-                    </span>
-                    <div className="flex gap-1">
-                      {participant.is_registered && (
-                        <Badge variant="secondary" className="text-xs">Registrado</Badge>
-                      )}
-                      {participant.paid && (
-                        <Badge variant="default" className="text-xs">Pagado</Badge>
-                      )}
+              {account.account_participants?.map((participant, index) => {
+                const isCurrentUser = participant.participant_id === user?.id;
+                return (
+                  <div 
+                    key={index} 
+                    className={`flex justify-between items-center p-3 rounded-lg border ${
+                      isCurrentUser 
+                        ? "bg-primary/10 border-primary/30 ring-1 ring-primary/20" 
+                        : "bg-muted/50"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className={`font-medium ${isCurrentUser ? "text-primary font-semibold" : ""}`}>
+                        {participant.name || participant.email}
+                        {isCurrentUser && " (Tú)"}
+                      </span>
+                      <div className="flex gap-1">
+                        {participant.is_registered && (
+                          <Badge variant="secondary" className="text-xs">Registrado</Badge>
+                        )}
+                        {participant.paid && (
+                          <Badge variant="default" className="text-xs">Pagado</Badge>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className={`font-semibold ${isCurrentUser ? "text-primary text-lg" : ""}`}>
+                        ${participant.total_amount?.toLocaleString() || 0}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {isCurrentUser ? "Mi parte" : "Su parte"}
+                      </p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-semibold">${participant.total_amount?.toLocaleString() || 0}</p>
-                    <p className="text-sm text-muted-foreground">Su parte</p>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </CardContent>
         </Card>
