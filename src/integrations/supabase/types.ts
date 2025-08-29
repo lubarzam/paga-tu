@@ -272,6 +272,10 @@ export type Database = {
         Args: { p_account_id: string; p_email: string; p_name?: string }
         Returns: Json
       }
+      user_has_account_access: {
+        Args: { _account_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
