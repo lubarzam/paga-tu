@@ -8,6 +8,7 @@ import Layout from "./components/Layout";
 import Dashboard from "./components/Dashboard";
 import CreateAccount from "./components/CreateAccount";
 import AccountDetail from "./components/AccountDetail";
+import Profile from "./components/Profile";
 import EditAccount from "./pages/EditAccount";
 import NotFound from "./pages/NotFound";
 
@@ -32,6 +33,9 @@ const App = () => (
           </Route>
           <Route path="/account/:id/edit" element={<Layout />}>
             <Route index element={<EditAccount />} />
+          </Route>
+          <Route path="/profile" element={<Layout />}>
+            <Route index element={<Profile />} />
           </Route>
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

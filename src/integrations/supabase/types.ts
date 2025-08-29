@@ -263,7 +263,11 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_number: string | null
+          account_type: string | null
           avatar_url: string | null
+          bank_email: string | null
+          bank_name: string | null
           created_at: string | null
           email: string
           id: string
@@ -271,7 +275,11 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          account_number?: string | null
+          account_type?: string | null
           avatar_url?: string | null
+          bank_email?: string | null
+          bank_name?: string | null
           created_at?: string | null
           email: string
           id: string
@@ -279,7 +287,11 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          account_number?: string | null
+          account_type?: string | null
           avatar_url?: string | null
+          bank_email?: string | null
+          bank_name?: string | null
           created_at?: string | null
           email?: string
           id?: string

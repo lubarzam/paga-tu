@@ -63,16 +63,18 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Account not found");
     }
 
-    // Get owner details
-    const { data: owner, error: ownerError } = await supabaseClient
+    // Get owner profile with bank information
+    const { data: ownerProfile, error: ownerProfileError } = await supabaseClient
       .from("profiles")
       .select("*")
       .eq("id", account.owner_id)
       .single();
 
-    if (ownerError || !owner) {
-      throw new Error("Account owner not found");
+    if (ownerProfileError) {
+      console.warn("Owner profile not found, using basic owner info");
     }
+
+    const owner = ownerProfile || { name: "Usuario", email: "usuario@email.com" };
 
     // Send reminder emails to all participants (sequentially to avoid rate limits)
     const results = [];
@@ -101,6 +103,21 @@ const handler = async (req: Request): Promise<Response> => {
               </div>
               
               <p>Por favor, coordina el pago con ${owner.name || owner.email} a la brevedad posible.</p>
+              
+              ${owner.bank_name ? `
+                <div style="background-color: #e8f5e8; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4caf50;">
+                  <h3 style="margin: 0 0 10px 0; color: #2e7d32;">💳 Datos para transferencia:</h3>
+                  <p style="margin: 5px 0;"><strong>Banco:</strong> ${owner.bank_name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</p>
+                  ${owner.account_type ? `<p style="margin: 5px 0;"><strong>Tipo de cuenta:</strong> ${owner.account_type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</p>` : ''}
+                  ${owner.account_number ? `<p style="margin: 5px 0;"><strong>Número de cuenta:</strong> ${owner.account_number}</p>` : ''}
+                  <p style="margin: 5px 0;"><strong>Titular:</strong> ${owner.name || owner.email}</p>
+                  ${owner.bank_email ? `<p style="margin: 5px 0;"><strong>Email del banco:</strong> ${owner.bank_email}</p>` : ''}
+                </div>
+              ` : `
+                <div style="background-color: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
+                  <p style="margin: 0; color: #856404;">💡 <strong>Tip:</strong> ${owner.name || owner.email} puede configurar sus datos bancarios en su perfil para facilitar los pagos.</p>
+                </div>
+              `}
               
               <p style="color: #666; font-size: 14px;">
                 Este recordatorio fue enviado por PagaTu - La forma más fácil de dividir gastos.
