@@ -194,8 +194,6 @@ export const accountService = {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('Usuario no autenticado');
 
-    console.log('DEBUG SERVICE: User ID:', user.id);
-
     // Fetch accounts the user owns
     const { data: owned, error: ownedError } = await supabase
       .from('accounts')
@@ -203,17 +201,11 @@ export const accountService = {
       .eq('owner_id', user.id)
       .order('created_at', { ascending: false });
 
-    console.log('DEBUG SERVICE: Owned accounts:', owned);
-    console.log('DEBUG SERVICE: Owned error:', ownedError);
-
     // Fetch accounts where the user is a participant 
     const { data: participantRows, error: participantError } = await supabase
       .from('account_participants')
       .select('account_id')
       .eq('participant_id', user.id);
-
-    console.log('DEBUG SERVICE: Participant rows:', participantRows);
-    console.log('DEBUG SERVICE: Participant error:', participantError);
 
     if (ownedError && participantError) {
       throw ownedError;
@@ -223,7 +215,6 @@ export const accountService = {
     let participating = [];
     if (participantRows && participantRows.length > 0) {
       const accountIds = participantRows.map(r => r.account_id);
-      console.log('DEBUG SERVICE: Account IDs to fetch:', accountIds);
       
       // First get all accounts
       const { data: allParticipatingAccounts, error: participatingError } = await supabase
@@ -231,19 +222,8 @@ export const accountService = {
         .select('*')
         .in('id', accountIds);
       
-      
-      console.log('DEBUG SERVICE: All participating accounts before filter:', allParticipatingAccounts);
-      console.log('DEBUG SERVICE: All participating accounts details:', allParticipatingAccounts?.map(a => ({ id: a.id, name: a.name, owner_id: a.owner_id })));
-      console.log('DEBUG SERVICE: Current user id:', user.id);
-      console.log('DEBUG SERVICE: Participating error:', participatingError);
-      
       // Then filter out accounts I own in JavaScript
-      participating = (allParticipatingAccounts || []).filter(account => {
-        const isNotOwner = account.owner_id !== user.id;
-        console.log(`DEBUG SERVICE: Account ${account.name} (${account.id}) - owner: ${account.owner_id}, isNotOwner: ${isNotOwner}`);
-        return isNotOwner;
-      });
-      console.log('DEBUG SERVICE: Participating accounts after filter:', participating);
+      participating = (allParticipatingAccounts || []).filter(account => account.owner_id !== user.id);
     }
 
     const all = [...(owned || []), ...participating];

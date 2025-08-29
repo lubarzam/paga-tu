@@ -31,8 +31,6 @@ const Dashboard = () => {
     try {
       setLoading(true);
       const data = await accountService.getUserAccounts();
-      console.log('DEBUG: Loaded accounts:', data);
-      console.log('DEBUG: User ID:', user?.id);
       setAccounts(data || []);
     } catch (error) {
       console.error('Error loading accounts:', error);
@@ -67,9 +65,6 @@ const Dashboard = () => {
   const ownAccounts = accounts.filter(account => account.owner_id === user?.id);
   const participantAccounts = accounts.filter(account => account.owner_id !== user?.id);
   
-  console.log('DEBUG: All accounts:', accounts);
-  console.log('DEBUG: Own accounts:', ownAccounts);
-  console.log('DEBUG: Participant accounts:', participantAccounts);
 
   return (
     <div className="space-y-6">
