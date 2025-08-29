@@ -4,12 +4,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Users, Calendar, User, DollarSign } from "lucide-react";
+import { ArrowLeft, Users, Calendar, User, DollarSign, X, AlertTriangle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { accountService } from "@/services/accountService";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const AccountDetail = () => {
   const { id } = useParams();
@@ -22,12 +24,42 @@ const AccountDetail = () => {
   const [showMarkPaidDialog, setShowMarkPaidDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedParticipant, setSelectedParticipant] = useState("");
+  const [showBankDataWarning, setShowBankDataWarning] = useState(false);
+  const [userProfile, setUserProfile] = useState(null);
 
   useEffect(() => {
     if (id) {
       loadAccount();
     }
   }, [id]);
+
+  useEffect(() => {
+    if (user) {
+      loadUserProfile();
+    }
+  }, [user]);
+
+  const loadUserProfile = async () => {
+    try {
+      const { data } = await supabase
+        .from('profiles')
+        .select('bank_name, account_type, account_number')
+        .eq('id', user?.id)
+        .single();
+      
+      setUserProfile(data);
+      
+      // Check if bank data is missing and show warning
+      if (data && (!data.bank_name || !data.account_type || !data.account_number)) {
+        setShowBankDataWarning(true);
+      } else if (!data) {
+        setShowBankDataWarning(true);
+      }
+    } catch (error) {
+      console.error('Error loading user profile:', error);
+      setShowBankDataWarning(true);
+    }
+  };
 
   const loadAccount = async () => {
     try {
@@ -168,6 +200,37 @@ const AccountDetail = () => {
           </div>
         </div>
       </div>
+
+      {/* Bank Data Warning */}
+      {showBankDataWarning && isOwner && (
+        <Alert className="border-orange-200 bg-orange-50 dark:border-orange-800 dark:bg-orange-950">
+          <AlertTriangle className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+          <AlertDescription className="flex items-center justify-between">
+            <div className="flex-1">
+              <strong className="text-orange-800 dark:text-orange-200">Datos bancarios incompletos:</strong>{" "}
+              <span className="text-orange-700 dark:text-orange-300">
+                Para que tus contactos puedan realizarte transferencias, completa tu información bancaria en tu perfil.
+              </span>
+              <Button 
+                variant="link" 
+                size="sm" 
+                className="p-0 h-auto text-orange-700 hover:text-orange-800 dark:text-orange-300 dark:hover:text-orange-200 underline ml-1"
+                onClick={() => navigate('/profile')}
+              >
+                Completar ahora
+              </Button>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-auto p-1 text-orange-600 hover:text-orange-800 hover:bg-orange-100 dark:text-orange-400 dark:hover:text-orange-200 dark:hover:bg-orange-900"
+              onClick={() => setShowBankDataWarning(false)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Account Summary */}
       <Card className="bg-gradient-to-r from-primary/10 to-primary/5">
