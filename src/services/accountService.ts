@@ -175,7 +175,7 @@ export const accountService = {
             .from('item_participants')
             .select(`
               participant_id,
-              account_participants(name, email, is_registered)
+              account_participants!inner(name, email, is_registered)
             `)
             .eq('item_id', item.id);
 
