@@ -259,7 +259,8 @@ const CreateAccount = () => {
               </div>
               <div className="flex gap-2">
                 <Input
-                  placeholder="Nombre del participante"
+                  placeholder="Email del participante (ej: juan@email.com)"
+                  type="email"
                   value={newParticipant}
                   onChange={(e) => setNewParticipant(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && addParticipant()}
