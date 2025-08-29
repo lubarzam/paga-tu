@@ -89,9 +89,9 @@ const Dashboard = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-white/80 text-sm">Total por pagar</p>
-                <p className="text-2xl font-bold">
-                  ${participantAccounts.reduce((sum, acc) => sum + (acc.total || 0), 0).toLocaleString()}
-                </p>
+                 <p className="text-2xl font-bold">
+                   ${participantAccounts.reduce((sum, acc) => sum + (acc.user_amount || 0), 0).toLocaleString()}
+                 </p>
               </div>
               <Clock className="h-8 w-8 text-white/80" />
             </div>
@@ -211,17 +211,17 @@ const Dashboard = () => {
                             Pendiente
                           </Badge>
                         </div>
-                        <div className="flex flex-col gap-1 text-sm text-muted-foreground">
-                          <span>{new Date(account.created_at).toLocaleDateString()}</span>
-                          <span>Pagado por: {account.profiles?.name || account.profiles?.email}</span>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-semibold text-lg">${account.total?.toLocaleString()}</p>
-                        <p className="text-xs text-muted-foreground">
-                          Mi parte: Calculando...
-                        </p>
-                      </div>
+                         <div className="flex flex-col gap-1 text-sm text-muted-foreground">
+                           <span>{new Date(account.created_at).toLocaleDateString()}</span>
+                           <span>Pagado por: {account.profiles?.name || account.profiles?.email || 'Usuario'}</span>
+                         </div>
+                       </div>
+                       <div className="text-right">
+                         <p className="font-semibold text-lg">${account.total?.toLocaleString()}</p>
+                         <p className="text-xs text-muted-foreground">
+                           Mi parte: ${account.user_amount?.toLocaleString() || '0'}
+                         </p>
+                       </div>
                     </div>
                   </CardContent>
                 </Card>

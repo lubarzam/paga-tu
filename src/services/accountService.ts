@@ -211,15 +211,18 @@ export const accountService = {
       throw ownedError;
     }
 
-    // Get full account details for participating accounts
+    // Get full account details for participating accounts with owner profiles
     let participating = [];
     if (participantRows && participantRows.length > 0) {
       const accountIds = participantRows.map(r => r.account_id);
       
-      // First get all accounts
+      // Get all accounts with owner profiles
       const { data: allParticipatingAccounts, error: participatingError } = await supabase
         .from('accounts')
-        .select('*')
+        .select(`
+          *,
+          profiles!accounts_owner_id_fkey(name, email)
+        `)
         .in('id', accountIds);
       
       // Then filter out accounts I own in JavaScript
@@ -230,16 +233,20 @@ export const accountService = {
     // De-duplicate by account id
     const unique = Array.from(new Map(all.map((a: any) => [a.id, a])).values());
 
-    // Calculate status and participant count for each account
+    // Calculate status, participant count, and user's amount for each account
     const accountsWithStatus = await Promise.all(
       unique.map(async (account: any) => {
         const { data: participants } = await supabase
           .from('account_participants')
-          .select('paid')
+          .select('paid, participant_id, total_amount')
           .eq('account_id', account.id);
 
         const totalParticipants = participants?.length || 0;
         const paidParticipants = participants?.filter(p => p.paid).length || 0;
+
+        // Get current user's amount for this account
+        const userParticipant = participants?.find(p => p.participant_id === user.id);
+        const userAmount = userParticipant?.total_amount || 0;
 
         let status = 'pending';
         if (paidParticipants === totalParticipants && totalParticipants > 0) {
@@ -252,6 +259,7 @@ export const accountService = {
           ...account,
           participant_count: totalParticipants,
           paid_count: paidParticipants,
+          user_amount: userAmount,
           status
         };
       })
