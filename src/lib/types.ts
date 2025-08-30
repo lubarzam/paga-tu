@@ -9,6 +9,17 @@ export interface Profile {
   updated_at: string;
 }
 
+export interface BankingDetails {
+  id: string;
+  user_id: string;
+  bank_name?: string;
+  account_type?: string;
+  account_number?: string;
+  bank_email?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Account {
   id: string;
   name: string;

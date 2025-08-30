@@ -18,6 +18,9 @@ const Profile = () => {
   const [profile, setProfile] = useState({
     name: "",
     email: "",
+  });
+  
+  const [bankingDetails, setBankingDetails] = useState({
     bank_name: "",
     account_type: "",
     account_number: "",
@@ -33,30 +36,51 @@ const Profile = () => {
   const loadProfile = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      
+      // Load profile data
+      const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user?.id)
         .single();
 
-      if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
-        throw error;
+      if (profileError && profileError.code !== 'PGRST116') { // PGRST116 = no rows returned
+        throw profileError;
       }
 
-      if (data) {
+      // Load banking details separately
+      const { data: bankingData, error: bankingError } = await supabase
+        .from('banking_details' as any)
+        .select('*')
+        .eq('user_id', user?.id)
+        .single();
+
+      if (bankingError && bankingError.code !== 'PGRST116') {
+        console.warn('Banking details not found, this is normal for new users');
+      }
+
+      if (profileData) {
         setProfile({
-          name: data.name || "",
-          email: data.email || user?.email || "",
-          bank_name: data.bank_name || "",
-          account_type: data.account_type || "",
-          account_number: data.account_number || "",
-          bank_email: data.bank_email || "",
+          name: profileData.name || "",
+          email: profileData.email || user?.email || "",
         });
       } else {
         // If no profile exists, create one with basic info
         setProfile({
           name: user?.user_metadata?.name || "",
           email: user?.email || "",
+        });
+      }
+
+      if (bankingData) {
+        setBankingDetails({
+          bank_name: (bankingData as any).bank_name || "",
+          account_type: (bankingData as any).account_type || "",
+          account_number: (bankingData as any).account_number || "",
+          bank_email: (bankingData as any).bank_email || "",
+        });
+      } else {
+        setBankingDetails({
           bank_name: "",
           account_type: "",
           account_number: "",
@@ -79,19 +103,29 @@ const Profile = () => {
     try {
       setSaving(true);
       
-      const { error } = await supabase
+      // Save profile data
+      const { error: profileError } = await supabase
         .from('profiles')
         .upsert({
           id: user?.id,
           name: profile.name,
           email: profile.email,
-          bank_name: profile.bank_name,
-          account_type: profile.account_type,
-          account_number: profile.account_number,
-          bank_email: profile.bank_email,
         });
 
-      if (error) throw error;
+      if (profileError) throw profileError;
+
+      // Save banking details separately
+      const { error: bankingError } = await supabase
+        .from('banking_details' as any)
+        .upsert({
+          user_id: user?.id,
+          bank_name: bankingDetails.bank_name,
+          account_type: bankingDetails.account_type,
+          account_number: bankingDetails.account_number,
+          bank_email: bankingDetails.bank_email,
+        } as any);
+
+      if (bankingError) throw bankingError;
 
       toast({
         title: "Perfil actualizado",
@@ -110,10 +144,17 @@ const Profile = () => {
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setProfile(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    if (field === 'name' || field === 'email') {
+      setProfile(prev => ({
+        ...prev,
+        [field]: value
+      }));
+    } else {
+      setBankingDetails(prev => ({
+        ...prev,
+        [field]: value
+      }));
+    }
   };
 
   if (loading) {
@@ -191,7 +232,7 @@ const Profile = () => {
             <div>
               <Label htmlFor="bankName">Banco</Label>
               <Select
-                value={profile.bank_name}
+                value={bankingDetails.bank_name}
                 onValueChange={(value) => handleInputChange('bank_name', value)}
               >
                 <SelectTrigger>
@@ -215,7 +256,7 @@ const Profile = () => {
             <div>
               <Label htmlFor="accountType">Tipo de cuenta</Label>
               <Select
-                value={profile.account_type}
+                value={bankingDetails.account_type}
                 onValueChange={(value) => handleInputChange('account_type', value)}
               >
                 <SelectTrigger>
@@ -236,7 +277,7 @@ const Profile = () => {
               <Label htmlFor="accountNumber">Número de cuenta</Label>
               <Input
                 id="accountNumber"
-                value={profile.account_number}
+                value={bankingDetails.account_number}
                 onChange={(e) => handleInputChange('account_number', e.target.value)}
                 placeholder="12345678"
               />
@@ -246,7 +287,7 @@ const Profile = () => {
               <Input
                 id="bankEmail"
                 type="email"
-                value={profile.bank_email}
+                value={bankingDetails.bank_email}
                 onChange={(e) => handleInputChange('bank_email', e.target.value)}
                 placeholder="tu@banco.cl"
               />
