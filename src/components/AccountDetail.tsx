@@ -42,15 +42,15 @@ const AccountDetail = () => {
   const loadUserProfile = async () => {
     try {
       const { data } = await supabase
-        .from('profiles')
+        .from('banking_details' as any)
         .select('bank_name, account_type, account_number')
-        .eq('id', user?.id)
+        .eq('user_id', user?.id)
         .single();
       
       setUserProfile(data);
       
       // Check if bank data is missing and show warning
-      if (data && (!data.bank_name || !data.account_type || !data.account_number)) {
+      if (data && (!(data as any).bank_name || !(data as any).account_type || !(data as any).account_number)) {
         setShowBankDataWarning(true);
       } else if (!data) {
         setShowBankDataWarning(true);

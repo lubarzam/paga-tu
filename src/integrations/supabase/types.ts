@@ -354,7 +354,7 @@ export type Database = {
         Returns: Json
       }
       get_participant_basic_info: {
-        Args: { participant_id: string }
+        Args: { p_participant_id: string }
         Returns: {
           avatar_url: string
           email: string
