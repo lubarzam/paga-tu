@@ -324,6 +324,10 @@ export type Database = {
         Args: { p_email: string; p_name?: string }
         Returns: string
       }
+      get_owner_payment_info: {
+        Args: { p_account_id: string }
+        Returns: Json
+      }
       get_participant_basic_info: {
         Args: { participant_id: string }
         Returns: {
