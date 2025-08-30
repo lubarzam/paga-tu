@@ -96,24 +96,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "account_participants_participant_id_fkey"
-            columns: ["participant_id"]
-            isOneToOne: false
-            referencedRelation: "safe_participant_profiles"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "fk_account_participants_profiles"
             columns: ["participant_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_account_participants_profiles"
-            columns: ["participant_id"]
-            isOneToOne: false
-            referencedRelation: "safe_participant_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -163,14 +149,40 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "accounts_owner_id_fkey"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "safe_participant_profiles"
-            referencedColumns: ["id"]
-          },
         ]
+      }
+      banking_details: {
+        Row: {
+          account_number: string | null
+          account_type: string | null
+          bank_email: string | null
+          bank_name: string | null
+          created_at: string | null
+          id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          account_number?: string | null
+          account_type?: string | null
+          bank_email?: string | null
+          bank_name?: string | null
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          account_number?: string | null
+          account_type?: string | null
+          bank_email?: string | null
+          bank_name?: string | null
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       frequent_contacts: {
         Row: {
@@ -251,13 +263,6 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "invitations_invited_by_fkey"
-            columns: ["invited_by"]
-            isOneToOne: false
-            referencedRelation: "safe_participant_profiles"
-            referencedColumns: ["id"]
-          },
         ]
       }
       item_participants: {
@@ -298,11 +303,7 @@ export type Database = {
       }
       profiles: {
         Row: {
-          account_number: string | null
-          account_type: string | null
           avatar_url: string | null
-          bank_email: string | null
-          bank_name: string | null
           created_at: string | null
           email: string
           id: string
@@ -310,11 +311,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
-          account_number?: string | null
-          account_type?: string | null
           avatar_url?: string | null
-          bank_email?: string | null
-          bank_name?: string | null
           created_at?: string | null
           email: string
           id: string
@@ -322,11 +319,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
-          account_number?: string | null
-          account_type?: string | null
           avatar_url?: string | null
-          bank_email?: string | null
-          bank_name?: string | null
           created_at?: string | null
           email?: string
           id?: string
@@ -337,45 +330,7 @@ export type Database = {
       }
     }
     Views: {
-      safe_participant_profiles: {
-        Row: {
-          account_number: string | null
-          account_type: string | null
-          avatar_url: string | null
-          bank_email: string | null
-          bank_name: string | null
-          created_at: string | null
-          email: string | null
-          id: string | null
-          name: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          account_number?: never
-          account_type?: never
-          avatar_url?: string | null
-          bank_email?: never
-          bank_name?: never
-          created_at?: string | null
-          email?: string | null
-          id?: string | null
-          name?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          account_number?: never
-          account_type?: never
-          avatar_url?: string | null
-          bank_email?: never
-          bank_name?: never
-          created_at?: string | null
-          email?: string | null
-          id?: string | null
-          name?: string | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       accept_invitation: {
