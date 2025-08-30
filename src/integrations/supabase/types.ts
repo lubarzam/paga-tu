@@ -324,6 +324,15 @@ export type Database = {
         Args: { p_email: string; p_name?: string }
         Returns: string
       }
+      get_participant_basic_info: {
+        Args: { participant_id: string }
+        Returns: {
+          avatar_url: string
+          email: string
+          id: string
+          name: string
+        }[]
+      }
       is_account_co_participant: {
         Args: { _account_id: string }
         Returns: boolean
