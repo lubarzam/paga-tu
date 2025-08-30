@@ -2,11 +2,8 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
-// Resend client initialized inside handler to avoid errors during preflight
-// const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
-
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": "https://vcnaixizvhafgwoajvrx.supabase.co",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-api-version",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
@@ -26,6 +23,15 @@ const handler = async (req: Request): Promise<Response> => {
   console.log('Processing request...');
 
   try {
+    // Get JWT token from Authorization header
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ success: false, error: "Authentication required" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
     const apiKey = Deno.env.get("RESEND_API_KEY");
     if (!apiKey) {
       console.error("Missing RESEND_API_KEY");
@@ -42,14 +48,23 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Account ID is required");
     }
 
-    // Create Supabase client with service role key
+    // Create Supabase client with the user's JWT token
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-      { auth: { persistSession: false } }
+      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+      { 
+        auth: { 
+          persistSession: false 
+        },
+        global: {
+          headers: {
+            Authorization: authHeader,
+          }
+        }
+      }
     );
 
-    // Get account details
+    // Get account details with RLS protection
     const { data: account, error: accountError } = await supabaseClient
       .from("accounts")
       .select(`
@@ -60,21 +75,20 @@ const handler = async (req: Request): Promise<Response> => {
       .single();
 
     if (accountError || !account) {
-      throw new Error("Account not found");
+      console.error("Account access denied or not found:", accountError);
+      throw new Error("Account not found or access denied");
     }
 
-    // Get owner profile with bank information
-    const { data: ownerProfile, error: ownerProfileError } = await supabaseClient
-      .from("profiles")
-      .select("*")
-      .eq("id", account.owner_id)
-      .single();
+    // Use the secure RPC function to get owner payment info
+    const { data: ownerInfo, error: ownerError } = await supabaseClient
+      .rpc("get_owner_payment_info", { p_account_id: accountId });
 
-    if (ownerProfileError) {
-      console.warn("Owner profile not found, using basic owner info");
+    if (ownerError || !ownerInfo || ownerInfo.error) {
+      console.error("Failed to get owner payment info:", ownerError || ownerInfo?.error);
+      throw new Error("Failed to retrieve payment information");
     }
 
-    const owner = ownerProfile || { name: "Usuario", email: "usuario@email.com" };
+    const owner = ownerInfo;
 
     // Send reminder emails to all participants (sequentially to avoid rate limits)
     const results = [];
