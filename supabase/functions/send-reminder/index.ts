@@ -8,6 +8,17 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+// HTML escape function to prevent injection
+const escapeHtml = (text: string | null | undefined): string => {
+  if (!text) return '';
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;');
+};
+
 const handler = async (req: Request): Promise<Response> => {
   console.log('Function called with method:', req.method);
   
@@ -103,33 +114,33 @@ const handler = async (req: Request): Promise<Response> => {
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
               <h2 style="color: #333;">Recordatorio de Pago</h2>
               
-              <p>Hola ${participant.name || participant.email},</p>
+              <p>Hola ${escapeHtml(participant.name || participant.email)},</p>
               
-              <p>Este es un recordatorio amigable de que tienes un pago pendiente en la cuenta <strong>"${account.name}"</strong>.</p>
+              <p>Este es un recordatorio amigable de que tienes un pago pendiente en la cuenta <strong>"${escapeHtml(account.name)}"</strong>.</p>
               
               <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
                 <h3 style="margin: 0 0 10px 0; color: #333;">Detalles de la cuenta:</h3>
-                <p style="margin: 5px 0;"><strong>Nombre:</strong> ${account.name}</p>
-                ${account.description ? `<p style="margin: 5px 0;"><strong>Descripción:</strong> ${account.description}</p>` : ''}
+                <p style="margin: 5px 0;"><strong>Nombre:</strong> ${escapeHtml(account.name)}</p>
+                ${account.description ? `<p style="margin: 5px 0;"><strong>Descripción:</strong> ${escapeHtml(account.description)}</p>` : ''}
                 <p style="margin: 5px 0;"><strong>Total de la cuenta:</strong> $${account.total.toLocaleString()}</p>
                 <p style="margin: 5px 0;"><strong>Tu parte:</strong> $${participant.total_amount?.toLocaleString() || 'Calculando...'}</p>
-                <p style="margin: 5px 0;"><strong>Pagado por:</strong> ${owner.name || owner.email}</p>
+                <p style="margin: 5px 0;"><strong>Pagado por:</strong> ${escapeHtml(owner.name || owner.email)}</p>
               </div>
               
-              <p>Por favor, coordina el pago con ${owner.name || owner.email} a la brevedad posible.</p>
+              <p>Por favor, coordina el pago con ${escapeHtml(owner.name || owner.email)} a la brevedad posible.</p>
               
               ${owner.bank_name ? `
                 <div style="background-color: #e8f5e8; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4caf50;">
                   <h3 style="margin: 0 0 10px 0; color: #2e7d32;">💳 Datos para transferencia:</h3>
-                  <p style="margin: 5px 0;"><strong>Banco:</strong> ${owner.bank_name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</p>
-                  ${owner.account_type ? `<p style="margin: 5px 0;"><strong>Tipo de cuenta:</strong> ${owner.account_type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</p>` : ''}
-                  ${owner.account_number ? `<p style="margin: 5px 0;"><strong>Número de cuenta:</strong> ${owner.account_number}</p>` : ''}
-                  <p style="margin: 5px 0;"><strong>Titular:</strong> ${owner.name || owner.email}</p>
-                  ${owner.bank_email ? `<p style="margin: 5px 0;"><strong>Email del banco:</strong> ${owner.bank_email}</p>` : ''}
+                  <p style="margin: 5px 0;"><strong>Banco:</strong> ${escapeHtml(owner.bank_name?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()))}</p>
+                  ${owner.account_type ? `<p style="margin: 5px 0;"><strong>Tipo de cuenta:</strong> ${escapeHtml(owner.account_type?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()))}</p>` : ''}
+                  ${owner.account_number ? `<p style="margin: 5px 0;"><strong>Número de cuenta:</strong> ${escapeHtml(owner.account_number)}</p>` : ''}
+                  <p style="margin: 5px 0;"><strong>Titular:</strong> ${escapeHtml(owner.name || owner.email)}</p>
+                  ${owner.bank_email ? `<p style="margin: 5px 0;"><strong>Email del banco:</strong> ${escapeHtml(owner.bank_email)}</p>` : ''}
                 </div>
               ` : `
                 <div style="background-color: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
-                  <p style="margin: 0; color: #856404;">💡 <strong>Tip:</strong> ${owner.name || owner.email} puede configurar sus datos bancarios en su perfil para facilitar los pagos.</p>
+                  <p style="margin: 0; color: #856404;">💡 <strong>Tip:</strong> ${escapeHtml(owner.name || owner.email)} puede configurar sus datos bancarios en su perfil para facilitar los pagos.</p>
                 </div>
               `}
               

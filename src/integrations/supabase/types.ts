@@ -370,6 +370,16 @@ export type Database = {
         Args: { p_account_id: string }
         Returns: undefined
       }
+      search_frequent_contacts: {
+        Args: { q: string }
+        Returns: {
+          email: string
+          id: string
+          last_used_at: string
+          name: string
+          usage_count: number
+        }[]
+      }
       send_invitation_email: {
         Args: { p_account_id: string; p_email: string; p_name?: string }
         Returns: Json

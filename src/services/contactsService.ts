@@ -70,18 +70,19 @@ export const contactsService = {
   },
 
   async searchContacts(query: string): Promise<FrequentContact[]> {
-    if (!query.trim()) return [];
-
+    // Input validation and sanitization
+    if (!query || query.trim().length < 2) {
+      return [];
+    }
+    
+    const sanitizedQuery = query.trim();
+    
     const { data, error } = await supabase
-      .from('frequent_contacts')
-      .select('*')
-      .or(`name.ilike.%${query}%,email.ilike.%${query}%`)
-      .order('usage_count', { ascending: false })
-      .limit(5);
+      .rpc('search_frequent_contacts', { q: sanitizedQuery });
 
     if (error) {
       console.error('Error searching contacts:', error);
-      throw error;
+      return [];
     }
 
     return data || [];
