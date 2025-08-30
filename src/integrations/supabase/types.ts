@@ -96,10 +96,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "account_participants_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "safe_participant_profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "fk_account_participants_profiles"
             columns: ["participant_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_account_participants_profiles"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "safe_participant_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -147,6 +161,13 @@ export type Database = {
             columns: ["owner_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accounts_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "safe_participant_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -230,6 +251,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "invitations_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "safe_participant_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       item_participants: {
@@ -309,7 +337,45 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      safe_participant_profiles: {
+        Row: {
+          account_number: string | null
+          account_type: string | null
+          avatar_url: string | null
+          bank_email: string | null
+          bank_name: string | null
+          created_at: string | null
+          email: string | null
+          id: string | null
+          name: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          account_number?: never
+          account_type?: never
+          avatar_url?: string | null
+          bank_email?: never
+          bank_name?: never
+          created_at?: string | null
+          email?: string | null
+          id?: string | null
+          name?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          account_number?: never
+          account_type?: never
+          avatar_url?: string | null
+          bank_email?: never
+          bank_name?: never
+          created_at?: string | null
+          email?: string | null
+          id?: string | null
+          name?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       accept_invitation: {
@@ -319,6 +385,10 @@ export type Database = {
       calculate_participant_totals: {
         Args: { p_account_id: string }
         Returns: Json
+      }
+      can_access_banking_info: {
+        Args: { profile_id: string }
+        Returns: boolean
       }
       create_temporary_profile: {
         Args: { p_email: string; p_name?: string }
