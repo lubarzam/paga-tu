@@ -268,33 +268,33 @@ const AccountDetail = () => {
            <CardContent>
              <div className="space-y-3">
                {account.account_items?.map((item, index) => (
-                 <div key={index} className="p-3 bg-muted/50 rounded-lg">
-                   <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                        <span className="font-medium">{item.name}</span>
-                        {item.participants && item.participants.length > 0 && (
-                          <div className="mt-1">
-                            <p className="text-xs text-muted-foreground mb-1">Participantes:</p>
-                            <div className="flex flex-wrap gap-1">
-                              {item.participants.map((participant, pIndex) => {
-                                const isCurrentUser = participant.participant_id === user?.id;
-                                return (
-                                  <Badge 
-                                    key={pIndex} 
-                                    variant={isCurrentUser ? "default" : "outline"} 
-                                    className={`text-xs ${isCurrentUser ? "bg-primary text-primary-foreground font-semibold" : ""}`}
-                                  >
-                                    {participant.name || participant.email}
-                                  </Badge>
-                                );
-                              })}
-                            </div>
+                <div key={index} className="p-2 bg-muted/50 rounded-lg">
+                  <div className="flex justify-between items-center">
+                    <div className="flex-1">
+                      <span className="font-medium">{item.name}</span>
+                      {item.participants && item.participants.length > 0 && (
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-xs text-muted-foreground">Participantes:</span>
+                          <div className="flex flex-wrap gap-1">
+                            {item.participants.map((participant, pIndex) => {
+                              const isCurrentUser = participant.participant_id === user?.id;
+                              return (
+                                <Badge 
+                                  key={pIndex} 
+                                  variant={isCurrentUser ? "default" : "outline"} 
+                                  className={`text-xs ${isCurrentUser ? "bg-primary text-primary-foreground font-semibold" : ""}`}
+                                >
+                                  {participant.name || participant.email}
+                                </Badge>
+                              );
+                            })}
                           </div>
-                        )}
-                     </div>
-                     <span className="font-semibold ml-4">${item.amount?.toLocaleString()}</span>
-                   </div>
-                 </div>
+                        </div>
+                      )}
+                    </div>
+                    <span className="font-semibold ml-4">${item.amount?.toLocaleString()}</span>
+                  </div>
+                </div>
                ))}
                {(!account.account_items || account.account_items.length === 0) && (
                  <p className="text-muted-foreground text-center py-4">No hay artículos registrados</p>
