@@ -20,7 +20,7 @@ const emailService = {
     const invitationLink = `${frontendUrl}/?invitation_token=${token}`;
 
     await transporter.sendMail({
-      from:    process.env.SMTP_FROM,
+      from:    `PagaTú <${process.env.SMTP_FROM}>`,
       to,
       subject: `${escapeHtml(inviterName)} te invitó a dividir gastos en PagaTú`,
       html: `
@@ -61,7 +61,7 @@ const emailService = {
 
   async sendReminderEmail({ to, participantName, accountName, accountTotal, participantAmount, owner }) {
     await transporter.sendMail({
-      from:    process.env.SMTP_FROM,
+      from:    `PagaTú <${process.env.SMTP_FROM}>`,
       to,
       subject: `Recordatorio: Pendiente de pago en "${escapeHtml(accountName)}"`,
       html: `

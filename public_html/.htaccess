@@ -1,13 +1,5 @@
 RewriteEngine On
 
-# ── mod_security: disable for entire site ─────────────────
-# Required because the Google OAuth code parameter contains "/"
-# which triggers mod_security rule 930120 (LFI false positive).
-# TODO: re-enable once a per-path whitelist is available in WHM.
-<IfModule mod_security2.c>
-  SecRuleEngine Off
-</IfModule>
-
 # ── API Proxy → Node.js backend (port 3001) ──────────────
 # Requires mod_proxy and mod_proxy_http to be enabled in Apache.
 # In WHM/cPanel these are usually active by default.
