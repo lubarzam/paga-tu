@@ -3,6 +3,10 @@ const { Strategy: GoogleStrategy } = require('passport-google-oauth20');
 const { v4: uuidv4 } = require('uuid');
 const pool = require('./database');
 
+// Stubs required when passport.session() middleware is used
+passport.serializeUser((user, done) => done(null, user.id));
+passport.deserializeUser((id, done) => done(null, { id }));
+
 passport.use(
   new GoogleStrategy(
     {
@@ -11,6 +15,7 @@ passport.use(
       callbackURL:  `${process.env.FRONTEND_URL}/api/auth/google/callback`,
     },
     async (_accessToken, _refreshToken, profile, done) => {
+      console.log('🔍 Passport verify callback ejecutado para:', profile?.emails?.[0]?.value);
       try {
         const email     = profile.emails[0].value;
         const name      = profile.displayName;

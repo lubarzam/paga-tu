@@ -36,18 +36,27 @@ router.get(
  * GET /api/auth/google/callback
  * Google redirects here after user approves
  */
-router.get(
-  '/google/callback',
-  passport.authenticate('google', {
-    session: false,
-    failureRedirect: `${process.env.FRONTEND_URL}/?error=auth_failed`,
-  }),
-  (req, res) => {
-    const token = generateToken(req.user);
-    // Pass token to SPA via query param — frontend reads and stores it
+router.get('/google/callback', (req, res, next) => {
+  passport.authenticate('google', { session: false }, (err, user, info) => {
+    console.log('🔁 OAuth callback reached');
+    console.log('  err:', err);
+    console.log('  user:', user?.email ?? null);
+    console.log('  info:', info);
+
+    if (err) {
+      console.error('❌ Passport error:', err);
+      return res.redirect(`${process.env.FRONTEND_URL}/?error=auth_failed`);
+    }
+    if (!user) {
+      console.error('❌ No user returned. Info:', info);
+      return res.redirect(`${process.env.FRONTEND_URL}/?error=auth_failed`);
+    }
+
+    const token = generateToken(user);
+    console.log('✅ Login OK, redirigiendo con token para:', user.email);
     res.redirect(`${process.env.FRONTEND_URL}/?auth_token=${token}`);
-  }
-);
+  })(req, res, next);
+});
 
 /**
  * GET /api/auth/me

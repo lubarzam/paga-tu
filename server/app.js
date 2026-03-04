@@ -3,6 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const session = require('express-session');
 const passport = require('passport');
 
 // Load passport strategy configuration
@@ -26,7 +27,22 @@ app.use(cors({
 
 app.use(express.json());
 app.use(cookieParser());
+
+// Session required by Passport to store OAuth state during Google login flow.
+// Only used for the duration of the OAuth round-trip; auth tokens are JWT.
+app.use(session({
+  secret: process.env.JWT_SECRET || 'oauth-state-secret',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 5 * 60 * 1000, // 5 minutes — only needed during OAuth flow
+  },
+}));
+
 app.use(passport.initialize());
+app.use(passport.session());
 
 // ── Routes ────────────────────────────────────────────────
 app.use('/api/auth',           authRoutes);
