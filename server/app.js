@@ -29,15 +29,26 @@ app.use(express.json());
 app.use(cookieParser());
 
 // Session required by Passport to store OAuth state during Google login flow.
-// Only used for the duration of the OAuth round-trip; auth tokens are JWT.
+// Uses MySQL store so state survives across multiple Node.js workers (cPanel/Passenger).
+const sessionStore = new (require('express-mysql-session')(session))({
+  host:     process.env.DB_HOST || 'localhost',
+  user:     process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  clearExpired: true,
+  checkExpirationInterval: 15 * 60 * 1000,
+  expiration: 5 * 60 * 1000, // 5 minutes — only needed during OAuth flow
+});
+
 app.use(session({
   secret: process.env.JWT_SECRET || 'oauth-state-secret',
   resave: false,
   saveUninitialized: false,
+  store: sessionStore,
   cookie: {
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
-    maxAge: 5 * 60 * 1000, // 5 minutes — only needed during OAuth flow
+    maxAge: 5 * 60 * 1000,
   },
 }));
 
