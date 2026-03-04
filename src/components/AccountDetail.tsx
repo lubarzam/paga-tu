@@ -11,7 +11,7 @@ import { ArrowLeft, Users, Calendar, User, DollarSign, X, AlertTriangle } from "
 import { useAuth } from "@/hooks/useAuth";
 import { accountService } from "@/services/accountService";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { apiClient } from "@/integrations/api/client";
 
 const AccountDetail = () => {
   const { id } = useParams();
@@ -41,16 +41,16 @@ const AccountDetail = () => {
 
   const loadUserProfile = async () => {
     try {
-      const { data } = await supabase
-        .from('banking_details' as any)
-        .select('bank_name, account_type, account_number')
-        .eq('user_id', user?.id)
-        .single();
-      
+      const data = await apiClient.get<{
+        bank_name?: string;
+        account_type?: string;
+        account_number?: string;
+      } | null>('/api/banking-details');
+
       setUserProfile(data);
-      
+
       // Check if bank data is missing and show warning
-      if (data && (!(data as any).bank_name || !(data as any).account_type || !(data as any).account_number)) {
+      if (data && (!data.bank_name || !data.account_type || !data.account_number)) {
         setShowBankDataWarning(true);
       } else if (!data) {
         setShowBankDataWarning(true);
