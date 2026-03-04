@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User, CreditCard, Save } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { apiClient } from "@/integrations/api/client";
 
 const Profile = () => {
   const { user } = useAuth();
@@ -19,7 +19,7 @@ const Profile = () => {
     name: "",
     email: "",
   });
-  
+
   const [bankingDetails, setBankingDetails] = useState({
     bank_name: "",
     account_type: "",
@@ -36,55 +36,27 @@ const Profile = () => {
   const loadProfile = async () => {
     try {
       setLoading(true);
-      
-      // Load profile data
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user?.id)
-        .single();
 
-      if (profileError && profileError.code !== 'PGRST116') { // PGRST116 = no rows returned
-        throw profileError;
-      }
+      // Profile data comes directly from the authenticated user
+      setProfile({
+        name:  user?.name  || user?.user_metadata?.name  || "",
+        email: user?.email || "",
+      });
 
-      // Load banking details separately
-      const { data: bankingData, error: bankingError } = await supabase
-        .from('banking_details' as any)
-        .select('*')
-        .eq('user_id', user?.id)
-        .single();
-
-      if (bankingError && bankingError.code !== 'PGRST116') {
-        console.warn('Banking details not found, this is normal for new users');
-      }
-
-      if (profileData) {
-        setProfile({
-          name: profileData.name || "",
-          email: profileData.email || user?.email || "",
-        });
-      } else {
-        // If no profile exists, create one with basic info
-        setProfile({
-          name: user?.user_metadata?.name || "",
-          email: user?.email || "",
-        });
-      }
+      // Banking details from API
+      const bankingData = await apiClient.get<{
+        bank_name?: string;
+        account_type?: string;
+        account_number?: string;
+        bank_email?: string;
+      } | null>('/api/banking-details');
 
       if (bankingData) {
         setBankingDetails({
-          bank_name: (bankingData as any).bank_name || "",
-          account_type: (bankingData as any).account_type || "",
-          account_number: (bankingData as any).account_number || "",
-          bank_email: (bankingData as any).bank_email || "",
-        });
-      } else {
-        setBankingDetails({
-          bank_name: "",
-          account_type: "",
-          account_number: "",
-          bank_email: "",
+          bank_name:      bankingData.bank_name      || "",
+          account_type:   bankingData.account_type   || "",
+          account_number: bankingData.account_number || "",
+          bank_email:     bankingData.bank_email     || "",
         });
       }
     } catch (error) {
@@ -102,30 +74,12 @@ const Profile = () => {
   const handleSave = async () => {
     try {
       setSaving(true);
-      
-      // Save profile data
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .upsert({
-          id: user?.id,
-          name: profile.name,
-          email: profile.email,
-        });
 
-      if (profileError) throw profileError;
+      // Update display name
+      await apiClient.put('/api/auth/profile', { name: profile.name });
 
-      // Save banking details separately
-      const { error: bankingError } = await supabase
-        .from('banking_details' as any)
-        .upsert({
-          user_id: user?.id,
-          bank_name: bankingDetails.bank_name,
-          account_type: bankingDetails.account_type,
-          account_number: bankingDetails.account_number,
-          bank_email: bankingDetails.bank_email,
-        } as any);
-
-      if (bankingError) throw bankingError;
+      // Update banking details
+      await apiClient.put('/api/banking-details', bankingDetails);
 
       toast({
         title: "Perfil actualizado",
@@ -145,15 +99,9 @@ const Profile = () => {
 
   const handleInputChange = (field: string, value: string) => {
     if (field === 'name' || field === 'email') {
-      setProfile(prev => ({
-        ...prev,
-        [field]: value
-      }));
+      setProfile(prev => ({ ...prev, [field]: value }));
     } else {
-      setBankingDetails(prev => ({
-        ...prev,
-        [field]: value
-      }));
+      setBankingDetails(prev => ({ ...prev, [field]: value }));
     }
   };
 
@@ -179,7 +127,7 @@ const Profile = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Avatar className="h-8 w-8">
-              <AvatarImage src={user?.user_metadata?.avatar_url} />
+              <AvatarImage src={user?.user_metadata?.avatar_url ?? undefined} />
               <AvatarFallback>
                 {profile.name?.[0] || user?.email?.[0]?.toUpperCase()}
               </AvatarFallback>
@@ -271,7 +219,7 @@ const Profile = () => {
               </Select>
             </div>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="accountNumber">Número de cuenta</Label>
@@ -300,8 +248,8 @@ const Profile = () => {
           <div className="bg-muted/50 p-4 rounded-lg">
             <h4 className="font-medium mb-2">💡 ¿Para qué sirve esta información?</h4>
             <p className="text-sm text-muted-foreground">
-              Cuando envíes recordatorios de pago, los participantes verán tus datos bancarios 
-              para facilitar las transferencias. Esta información solo se incluye en los emails 
+              Cuando envíes recordatorios de pago, los participantes verán tus datos bancarios
+              para facilitar las transferencias. Esta información solo se incluye en los emails
               cuando tú eres el dueño de la cuenta.
             </p>
           </div>
