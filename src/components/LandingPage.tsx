@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { DollarSign, Calculator, Users, Bell, ArrowRight, Star, Zap, Check, Sparkles } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect } from "react";
+import HeroIllustration from "@/components/HeroIllustration";
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -18,7 +19,7 @@ const LandingPage = () => {
       navigate('/dashboard');
     } else {
       try {
-        await signInWithGoogle();
+        signInWithGoogle();
       } catch (error) {
         console.error('Error signing in:', error);
       }
@@ -102,52 +103,56 @@ const LandingPage = () => {
         </div>
 
         <div className="container px-4 relative">
-          <div className="max-w-3xl mx-auto text-center space-y-8">
-            <div className="inline-flex items-center gap-2 bg-violet-50 border border-violet-200 rounded-full px-4 py-1.5 text-sm text-violet-700 font-medium">
-              <Sparkles className="h-3.5 w-3.5" />
-              100% Gratis · Sin registro de tarjeta
-            </div>
-
-            <h1 className="text-5xl lg:text-7xl font-extrabold leading-tight tracking-tight">
-              Divide gastos{" "}
-              <span className="bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                sin drama
-              </span>
-            </h1>
-
-            <p className="text-xl text-muted-foreground max-w-xl mx-auto leading-relaxed">
-              Cada persona paga exactamente por lo que consumió. Propina incluida, recordatorios automáticos, sin peleas.
-            </p>
-
-            <p className="text-base font-semibold text-violet-600">
-              "mañana arreglamos" ✨ — pero con PagaTú, hoy mismo.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button
-                size="lg"
-                className="text-base px-8 h-12 bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 border-0 shadow-lg shadow-violet-200"
-                onClick={handleAuthAction}
-              >
-                Crear mi primera cuenta
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </div>
-
-            {/* Social proof */}
-            <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
-              <div className="flex items-center gap-1">
-                <div className="flex">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                  ))}
-                </div>
-                <span className="ml-1">5.0</span>
+          <div className="grid lg:grid-cols-2 gap-14 items-center">
+            {/* Left: text */}
+            <div className="space-y-8">
+              <div className="inline-flex items-center gap-2 bg-violet-50 border border-violet-200 rounded-full px-4 py-1.5 text-sm text-violet-700 font-medium">
+                <Sparkles className="h-3.5 w-3.5" />
+                100% Gratis · Sin registro de tarjeta
               </div>
-              <div className="w-px h-4 bg-border" />
-              <span>Gratis para siempre</span>
-              <div className="w-px h-4 bg-border" />
-              <span>Sin anuncios</span>
+
+              <h1 className="text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight">
+                Divide gastos{" "}
+                <span className="bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                  sin drama
+                </span>
+              </h1>
+
+              <p className="text-xl text-muted-foreground leading-relaxed">
+                Cada persona paga exactamente por lo que consumió. Propina incluida, recordatorios automáticos, sin peleas.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Button
+                  size="lg"
+                  className="text-base px-8 h-12 bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 border-0 shadow-lg shadow-violet-200"
+                  onClick={handleAuthAction}
+                >
+                  Crear mi primera cuenta
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </div>
+
+              {/* Social proof */}
+              <div className="flex items-center gap-6 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <div className="flex">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                    ))}
+                  </div>
+                  <span className="ml-1">5.0</span>
+                </div>
+                <div className="w-px h-4 bg-border" />
+                <span>Gratis para siempre</span>
+                <div className="w-px h-4 bg-border" />
+                <span>Sin anuncios</span>
+              </div>
+            </div>
+
+            {/* Right: illustration */}
+            <div className="flex justify-center lg:justify-end">
+              <HeroIllustration />
             </div>
           </div>
         </div>
@@ -260,6 +265,7 @@ const LandingPage = () => {
                 <ul className="space-y-3">
                   {[
                     "Todo del plan Gratis",
+                    "Escanea el recibo con la cámara de tu teléfono",
                     "Exportar resumen en PDF",
                     "Integración con Webpay / Mercado Pago",
                     "Historial de pagos con gráficos",
@@ -354,9 +360,15 @@ const LandingPage = () => {
                 <p className="text-xs text-muted-foreground">"mañana arreglamos"</p>
               </div>
             </div>
-            <p className="text-sm text-muted-foreground">
-              © 2025 PagaTú. La forma más fácil de dividir gastos.
-            </p>
+            <div className="flex items-center gap-3 text-sm text-muted-foreground">
+              <span>© 2025 PagaTú.</span>
+              <button
+                onClick={() => navigate('/privacy')}
+                className="underline hover:text-foreground transition-colors"
+              >
+                Política de Privacidad
+              </button>
+            </div>
           </div>
         </div>
       </footer>

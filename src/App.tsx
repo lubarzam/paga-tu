@@ -11,6 +11,7 @@ import CreateAccount from "./components/CreateAccount";
 import AccountDetail from "./components/AccountDetail";
 import Profile from "./components/Profile";
 import EditAccount from "./pages/EditAccount";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 import NotFound from "./pages/NotFound";
 import { useAuth } from "./hooks/useAuth";
 import { accountService } from "./services/accountService";
@@ -81,6 +82,7 @@ const App = () => (
           <Route path="/profile" element={<Layout />}>
             <Route index element={<Profile />} />
           </Route>
+          <Route path="/privacy" element={<PrivacyPolicy />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

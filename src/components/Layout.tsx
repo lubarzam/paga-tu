@@ -41,9 +41,12 @@ const Layout = () => {
             <div className="bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl p-1.5">
               <DollarSign className="h-5 w-5 text-white" />
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
-              PagaTú
-            </span>
+            <div>
+              <span className="text-xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
+                PagaTú
+              </span>
+              <p className="text-xs text-muted-foreground leading-none">mañana arreglamos</p>
+            </div>
           </div>
           
           <div className="flex items-center gap-2">
