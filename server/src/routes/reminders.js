@@ -41,6 +41,11 @@ router.post('/send', authMiddleware, async (req, res) => {
 
     const results = [];
     for (const participant of participants) {
+      // Never send a reminder to the account owner (they already paid)
+      if (participant.participant_id === req.user.id) continue;
+      // Skip participants who already paid
+      if (participant.paid) continue;
+
       try {
         await emailService.sendReminderEmail({
           to:                participant.email,
