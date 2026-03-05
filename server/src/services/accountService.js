@@ -320,15 +320,29 @@ const accountService = {
     // Delete existing items (item_participants cascade automatically)
     await pool.execute('DELETE FROM account_items WHERE account_id = ?', [accountId]);
 
+    // Recreate items and restore their participant associations
     for (const item of items) {
       const itemId = uuidv4();
       await pool.execute(
         'INSERT INTO account_items (id, account_id, name, amount) VALUES (?, ?, ?, ?)',
         [itemId, accountId, item.name, parseFloat(item.amount) || 0]
       );
+
+      // item.participants comes from getAccount as an array of account_participant objects
+      // each having an 'id' (account_participants.id) — restore those links
+      const itemParticipants = Array.isArray(item.participants) ? item.participants : [];
+      for (const p of itemParticipants) {
+        const participantId = typeof p === 'object' ? p.id : null;
+        if (participantId) {
+          await pool.execute(
+            'INSERT IGNORE INTO item_participants (id, item_id, participant_id) VALUES (?, ?, ?)',
+            [uuidv4(), itemId, participantId]
+          );
+        }
+      }
     }
 
-    // Recalculate totals (item_participants were deleted with items, totals reset to 0)
+    // Recalculate totals with restored item–participant links
     await calculateParticipantTotals(pool, accountId, subtotal, tip);
   },
 };
