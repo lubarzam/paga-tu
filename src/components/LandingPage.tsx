@@ -1,18 +1,15 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
-import { DollarSign, Calculator, Users, Bell, ArrowRight, Star, Zap, Check, Sparkles } from "lucide-react";
+import { DollarSign, Calculator, Users, Bell, ArrowRight, Star, Zap, Check, Sparkles, User, LogOut, LayoutDashboard, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { useEffect } from "react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import HeroIllustration from "@/components/HeroIllustration";
 
 const LandingPage = () => {
   const navigate = useNavigate();
-  const { user, signInWithGoogle } = useAuth();
-
-  useEffect(() => {
-    if (user) navigate('/dashboard');
-  }, [user, navigate]);
+  const { user, signInWithGoogle, signOut } = useAuth();
 
   const handleAuthAction = async () => {
     if (user) {
@@ -80,15 +77,55 @@ const LandingPage = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            <Button variant="ghost" onClick={handleAuthAction}>
-              Iniciar Sesión
-            </Button>
-            <Button
-              className="bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 border-0"
-              onClick={handleAuthAction}
-            >
-              Comenzar Gratis
-            </Button>
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="flex items-center gap-2">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={user.user_metadata?.avatar_url} />
+                      <AvatarFallback>
+                        {user.user_metadata?.name?.[0] || user.email?.[0]?.toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="hidden sm:inline">
+                      {user.user_metadata?.name || user.email}
+                    </span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => navigate('/dashboard')}>
+                    <LayoutDashboard className="h-4 w-4 mr-2" />
+                    Dashboard
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/profile')}>
+                    <User className="h-4 w-4 mr-2" />
+                    Mi Perfil
+                  </DropdownMenuItem>
+                  {user.is_admin && (
+                    <DropdownMenuItem onClick={() => navigate('/admin')}>
+                      <ShieldCheck className="h-4 w-4 mr-2" />
+                      Panel Admin
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem onClick={async () => { await signOut(); navigate('/'); }}>
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Cerrar Sesión
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <>
+                <Button variant="ghost" onClick={handleAuthAction}>
+                  Iniciar Sesión
+                </Button>
+                <Button
+                  className="bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 border-0"
+                  onClick={handleAuthAction}
+                >
+                  Comenzar Gratis
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </header>

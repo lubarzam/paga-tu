@@ -1,6 +1,6 @@
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Plus, DollarSign, User, ArrowLeft, LogOut } from "lucide-react";
+import { Plus, DollarSign, User, ArrowLeft, LogOut, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -38,15 +38,20 @@ const Layout = () => {
                 <ArrowLeft className="h-4 w-4" />
               </Button>
             )}
-            <div className="bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl p-1.5">
-              <DollarSign className="h-5 w-5 text-white" />
-            </div>
-            <div>
-              <span className="text-xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
-                PagaTú
-              </span>
-              <p className="text-xs text-muted-foreground leading-none">mañana arreglamos</p>
-            </div>
+            <button
+              onClick={() => navigate('/')}
+              className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+            >
+              <div className="bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl p-1.5">
+                <DollarSign className="h-5 w-5 text-white" />
+              </div>
+              <div className="text-left">
+                <span className="text-xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
+                  PagaTú
+                </span>
+                <p className="text-xs text-muted-foreground leading-none">mañana arreglamos</p>
+              </div>
+            </button>
           </div>
           
           <div className="flex items-center gap-2">
@@ -73,6 +78,12 @@ const Layout = () => {
                   <DropdownMenuItem onClick={() => navigate('/dashboard')}>
                     Dashboard
                   </DropdownMenuItem>
+                  {user.is_admin && (
+                    <DropdownMenuItem onClick={() => navigate('/admin')}>
+                      <ShieldCheck className="h-4 w-4 mr-2" />
+                      Panel Admin
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem onClick={handleSignOut}>
                     <LogOut className="h-4 w-4 mr-2" />
                     Cerrar Sesión
