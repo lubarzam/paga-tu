@@ -67,46 +67,61 @@ const Dashboard = () => {
   const participantAccounts = accounts.filter(account => account.owner_id !== user?.id);
   
 
+  const statusBorder: Record<string, string> = {
+    paid:    'border-l-4 border-l-green-400',
+    partial: 'border-l-4 border-l-yellow-400',
+    pending: 'border-l-4 border-l-red-400',
+  };
+
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground">
+        <Card className="bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-200 border-0">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-primary-foreground/80 text-sm">Total por cobrar</p>
-                <p className="text-2xl font-bold">
+                <p className="text-white/70 text-xs font-medium uppercase tracking-wide mb-1">Por cobrar</p>
+                <p className="text-3xl font-bold">
                   ${formatCLP(ownAccounts.reduce((sum, acc) => sum + (acc.total || 0), 0))}
                 </p>
+                <p className="text-white/70 text-xs mt-1">{ownAccounts.length} cuenta{ownAccounts.length !== 1 ? 's' : ''}</p>
               </div>
-              <TrendingUp className="h-8 w-8 text-primary-foreground/80" />
+              <div className="bg-white/20 rounded-2xl p-3">
+                <TrendingUp className="h-7 w-7 text-white" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-orange-400 to-orange-500 text-white">
+        <Card className="bg-gradient-to-br from-orange-400 to-rose-500 text-white shadow-lg shadow-orange-200 border-0">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-white/80 text-sm">Total por pagar</p>
-                 <p className="text-2xl font-bold">
-                   ${formatCLP(participantAccounts.reduce((sum, acc) => sum + (acc.user_amount || 0), 0))}
-                 </p>
+                <p className="text-white/70 text-xs font-medium uppercase tracking-wide mb-1">Por pagar</p>
+                <p className="text-3xl font-bold">
+                  ${formatCLP(participantAccounts.reduce((sum, acc) => sum + (acc.user_amount || 0), 0))}
+                </p>
+                <p className="text-white/70 text-xs mt-1">{participantAccounts.length} cuenta{participantAccounts.length !== 1 ? 's' : ''}</p>
               </div>
-              <Clock className="h-8 w-8 text-white/80" />
+              <div className="bg-white/20 rounded-2xl p-3">
+                <Clock className="h-7 w-7 text-white" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-green-400 to-green-500 text-white">
+        <Card className="bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-lg shadow-violet-200 border-0">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-white/80 text-sm">Cuentas totales</p>
-                <p className="text-2xl font-bold">{accounts.length}</p>
+                <p className="text-white/70 text-xs font-medium uppercase tracking-wide mb-1">Total cuentas</p>
+                <p className="text-3xl font-bold">{accounts.length}</p>
+                <p className="text-white/70 text-xs mt-1">activas</p>
               </div>
-              <CheckCircle className="h-8 w-8 text-white/80" />
+              <div className="bg-white/20 rounded-2xl p-3">
+                <CheckCircle className="h-7 w-7 text-white" />
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -114,71 +129,74 @@ const Dashboard = () => {
 
       {/* Main Content Tabs */}
       <Tabs defaultValue="paid" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="paid" className="flex items-center gap-2">
+        <TabsList className="grid w-full grid-cols-2 h-12">
+          <TabsTrigger value="paid" className="flex items-center gap-2 text-sm font-medium">
             <CreditCard className="h-4 w-4" />
-            Cuentas que pagué ({ownAccounts.length})
+            Pagué yo ({ownAccounts.length})
           </TabsTrigger>
-          <TabsTrigger value="owed" className="flex items-center gap-2">
+          <TabsTrigger value="owed" className="flex items-center gap-2 text-sm font-medium">
             <Receipt className="h-4 w-4" />
             Debo pagar ({participantAccounts.length})
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="paid" className="space-y-4">
+        <TabsContent value="paid" className="space-y-4 mt-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Cuentas que pagué</h2>
-            <Button onClick={() => navigate('/create')}>Crear nueva cuenta</Button>
+            <h2 className="text-base font-semibold text-muted-foreground">Cuentas que pagué</h2>
+            <Button onClick={() => navigate('/create')} size="sm">
+              + Nueva cuenta
+            </Button>
           </div>
-          
+
           <div className="space-y-3">
             {ownAccounts.length === 0 ? (
-              <Card className="p-8 text-center">
-                <CardContent>
-                  <p className="text-muted-foreground mb-4">No has creado ninguna cuenta aún</p>
-                  <Button onClick={() => navigate('/create')}>
-                    Crear mi primera cuenta
-                  </Button>
+              <Card className="border-dashed">
+                <CardContent className="p-10 text-center">
+                  <div className="bg-primary/10 rounded-full w-14 h-14 flex items-center justify-center mx-auto mb-4">
+                    <CreditCard className="h-7 w-7 text-primary" />
+                  </div>
+                  <p className="font-medium mb-1">Aún no has creado cuentas</p>
+                  <p className="text-muted-foreground text-sm mb-4">Divide gastos fácilmente con tus amigos</p>
+                  <Button onClick={() => navigate('/create')}>Crear mi primera cuenta</Button>
                 </CardContent>
               </Card>
             ) : (
               ownAccounts.map((account) => (
-                <Card 
-                  key={account.id} 
-                  className="hover:shadow-md transition-shadow cursor-pointer"
+                <Card
+                  key={account.id}
+                  className={`hover:shadow-md transition-all cursor-pointer hover:-translate-y-0.5 ${statusBorder[account.status] || statusBorder.pending}`}
                   onClick={() => handleAccountClick(account.id)}
                 >
                   <CardContent className="p-4">
-                     <div className="flex items-center justify-between">
-                       <div className="flex-1">
-                         <div className="flex items-center gap-2 mb-2">
-                           <h3 className="font-semibold">{account.name}</h3>
-                           <Badge variant={
-                             account.status === 'paid' ? 'default' : 
-                             account.status === 'partial' ? 'secondary' : 
-                             'destructive'
-                           }>
-                             {account.status === 'paid' ? 'Pagado' : 
-                              account.status === 'partial' ? 'Pagado parcialmente' : 
-                              'Pendiente de pago'}
-                           </Badge>
-                         </div>
-                         <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                           <span>{new Date(account.created_at).toLocaleDateString()}</span>
-                           <div className="flex items-center gap-1">
-                             <Users className="h-3 w-3" />
-                             {account.participant_count || 0} personas
-                           </div>
-                           {account.status === 'partial' && (
-                             <span>{account.paid_count}/{account.participant_count} pagaron</span>
-                           )}
-                         </div>
-                       </div>
-                       <div className="text-right">
-                         <p className="font-semibold text-lg">${formatCLP(account.total)}</p>
-                         <p className="text-sm text-muted-foreground">Total</p>
-                       </div>
-                     </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-semibold truncate">{account.name}</h3>
+                          <Badge className={
+                            account.status === 'paid'    ? 'bg-green-100 text-green-700 border-0' :
+                            account.status === 'partial' ? 'bg-yellow-100 text-yellow-700 border-0' :
+                                                           'bg-red-100 text-red-700 border-0'
+                          }>
+                            {account.status === 'paid' ? 'Cobrado' :
+                             account.status === 'partial' ? 'Parcial' : 'Pendiente'}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                          <span>{new Date(account.created_at).toLocaleDateString('es-CL')}</span>
+                          <span className="flex items-center gap-1">
+                            <Users className="h-3 w-3" />
+                            {account.participant_count || 0} personas
+                          </span>
+                          {account.status === 'partial' && (
+                            <span>{account.paid_count}/{account.participant_count} pagaron</span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-right ml-4 shrink-0">
+                        <p className="font-bold text-lg text-primary">${formatCLP(account.total)}</p>
+                        <p className="text-xs text-muted-foreground">total</p>
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
               ))
@@ -186,43 +204,40 @@ const Dashboard = () => {
           </div>
         </TabsContent>
 
-        <TabsContent value="owed" className="space-y-4">
-          <h2 className="text-lg font-semibold">Cuentas donde debo pagar</h2>
-          
+        <TabsContent value="owed" className="space-y-4 mt-4">
+          <h2 className="text-base font-semibold text-muted-foreground">Cuentas donde debo pagar</h2>
+
           <div className="space-y-3">
             {participantAccounts.length === 0 ? (
-              <Card className="p-8 text-center">
-                <CardContent>
-                  <p className="text-muted-foreground">No tienes cuentas pendientes por pagar</p>
+              <Card className="border-dashed">
+                <CardContent className="p-10 text-center">
+                  <div className="bg-green-100 rounded-full w-14 h-14 flex items-center justify-center mx-auto mb-4">
+                    <CheckCircle className="h-7 w-7 text-green-600" />
+                  </div>
+                  <p className="font-medium mb-1">¡Todo al día!</p>
+                  <p className="text-muted-foreground text-sm">No tienes cuentas pendientes por pagar</p>
                 </CardContent>
               </Card>
             ) : (
               participantAccounts.map((account) => (
-                <Card 
-                  key={account.id} 
-                  className="hover:shadow-md transition-shadow cursor-pointer"
+                <Card
+                  key={account.id}
+                  className="hover:shadow-md transition-all cursor-pointer hover:-translate-y-0.5 border-l-4 border-l-orange-400"
                   onClick={() => handleAccountClick(account.id)}
                 >
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h3 className="font-semibold">{account.name}</h3>
-                          <Badge variant="secondary">
-                            Pendiente
-                          </Badge>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold truncate mb-1">{account.name}</h3>
+                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                          <span>{new Date(account.created_at).toLocaleDateString('es-CL')}</span>
+                          <span>Pagó: {account.profiles?.name || account.profiles?.email || 'Usuario'}</span>
                         </div>
-                         <div className="flex flex-col gap-1 text-sm text-muted-foreground">
-                           <span>{new Date(account.created_at).toLocaleDateString()}</span>
-                           <span>Pagado por: {account.profiles?.name || account.profiles?.email || 'Usuario'}</span>
-                         </div>
-                       </div>
-                       <div className="text-right">
-                         <p className="font-semibold text-lg">${formatCLP(account.total)}</p>
-                         <p className="text-xs text-muted-foreground">
-                           Mi parte: ${formatCLP(account.user_amount)}
-                         </p>
-                       </div>
+                      </div>
+                      <div className="text-right ml-4 shrink-0">
+                        <p className="font-bold text-lg text-orange-500">${formatCLP(account.user_amount)}</p>
+                        <p className="text-xs text-muted-foreground">mi parte</p>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>

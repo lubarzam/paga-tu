@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { formatCLP } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Plus, X, Users, Calculator, Info, ChevronDown, Camera, Loader2 } from "lucide-react";
+import { Plus, X, Users, Calculator, Info, ChevronDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { accountService } from "@/services/accountService";
@@ -44,9 +44,6 @@ const CreateAccount = () => {
   const [tip, setTip] = useState("");
   const [tipIncluded, setTipIncluded] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isScanning, setIsScanning] = useState(false);
-  const [scannedItems, setScannedItems] = useState<{ name: string; amount: number; selected: boolean }[]>([]);
-  const [showScanModal, setShowScanModal] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -301,64 +298,6 @@ const CreateAccount = () => {
     }
   };
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleScanReceipt = () => {
-    fileInputRef.current?.click();
-  };
-
-  const onFileSelected = async (e: { target: HTMLInputElement }) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    e.target.value = '';
-
-    setIsScanning(true);
-    try {
-      const { createWorker } = await import('tesseract.js');
-      const worker = await createWorker('spa');
-      const { data: { text } } = await worker.recognize(file);
-      await worker.terminate();
-
-      // Parse lines: match "some text   1234" or "some text   $1.234"
-      const lines = text.split('\n');
-      const detected: { name: string; amount: number; selected: boolean }[] = [];
-      for (const line of lines) {
-        const match = line.trim().match(/^(.+?)\s{2,}[\$]?\s*([\d.,]+)\s*$/);
-        if (!match) continue;
-        const name = match[1].replace(/\s+/g, ' ').trim();
-        const amount = parseInt(match[2].replace(/[.,]/g, ''), 10);
-        if (name.length > 1 && amount > 0) {
-          detected.push({ name, amount, selected: true });
-        }
-      }
-
-      if (detected.length === 0) {
-        toast({ title: "Sin resultados", description: "No se detectaron ítems. Intenta con una foto más clara.", variant: "destructive" });
-      } else {
-        setScannedItems(detected);
-        setShowScanModal(true);
-      }
-    } catch {
-      toast({ title: "Error", description: "No se pudo procesar la imagen.", variant: "destructive" });
-    } finally {
-      setIsScanning(false);
-    }
-  };
-
-  const confirmScannedItems = () => {
-    const toAdd = scannedItems.filter(i => i.selected);
-    const newItems: Item[] = toAdd.map(i => ({
-      id: Date.now() + Math.random(),
-      name: i.name,
-      amount: i.amount,
-      participants: [],
-    }));
-    setItems(prev => [...prev, ...newItems]);
-    setShowScanModal(false);
-    setScannedItems([]);
-    toast({ title: `${newItems.length} ítems agregados`, description: "Ahora asigna participantes a cada ítem." });
-  };
-
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="flex items-center gap-2 mb-6">
@@ -470,29 +409,7 @@ const CreateAccount = () => {
 
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>Agregar ítem</CardTitle>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleScanReceipt}
-                  disabled={isScanning}
-                >
-                  {isScanning ? (
-                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Analizando...</>
-                  ) : (
-                    <><Camera className="h-4 w-4 mr-2" />Escanear boleta</>
-                  )}
-                </Button>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  capture="environment"
-                  className="hidden"
-                  onChange={onFileSelected}
-                />
-              </div>
+              <CardTitle>Agregar ítem</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-2">
@@ -513,6 +430,7 @@ const CreateAccount = () => {
                     placeholder="0"
                     value={currentItem.amount}
                     onChange={(e) => setCurrentItem({...currentItem, amount: e.target.value})}
+                    onKeyDown={(e) => e.key === 'Enter' && addItem()}
                   />
                 </div>
               </div>
@@ -685,61 +603,6 @@ const CreateAccount = () => {
         </div>
       </div>
 
-      {/* Modal de revisión de boleta escaneada */}
-      {showScanModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-background rounded-lg shadow-xl w-full max-w-md max-h-[80vh] flex flex-col">
-            <div className="p-4 border-b">
-              <h2 className="text-lg font-bold">Ítems detectados</h2>
-              <p className="text-sm text-muted-foreground">Selecciona los que quieres agregar</p>
-            </div>
-
-            <div className="overflow-y-auto flex-1 p-4 space-y-2">
-              {scannedItems.map((item, index) => (
-                <div key={index} className="flex items-center gap-3 p-3 border rounded-lg">
-                  <input
-                    type="checkbox"
-                    checked={item.selected}
-                    onChange={() => setScannedItems(prev =>
-                      prev.map((it, i) => i === index ? { ...it, selected: !it.selected } : it)
-                    )}
-                    className="h-4 w-4 shrink-0"
-                  />
-                  <input
-                    type="text"
-                    value={item.name}
-                    onChange={e => setScannedItems(prev =>
-                      prev.map((it, i) => i === index ? { ...it, name: e.target.value } : it)
-                    )}
-                    className="flex-1 bg-transparent text-sm outline-none"
-                  />
-                  <input
-                    type="number"
-                    value={item.amount}
-                    onChange={e => setScannedItems(prev =>
-                      prev.map((it, i) => i === index ? { ...it, amount: Number(e.target.value) } : it)
-                    )}
-                    className="w-24 bg-transparent text-sm text-right outline-none"
-                  />
-                </div>
-              ))}
-            </div>
-
-            <div className="p-4 border-t flex gap-2">
-              <Button variant="outline" className="flex-1" onClick={() => setShowScanModal(false)}>
-                Cancelar
-              </Button>
-              <Button
-                className="flex-1"
-                onClick={confirmScannedItems}
-                disabled={!scannedItems.some(i => i.selected)}
-              >
-                Agregar seleccionados
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
