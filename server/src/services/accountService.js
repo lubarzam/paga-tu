@@ -118,12 +118,13 @@ const accountService = {
 
     // Build the full participant list (owner first, then invitees)
     const allParticipants = [
-      { email: ownerProfile.email, name: ownerProfile.name || 'Tu', participantId: userId, isRegistered: true },
+      { email: ownerProfile.email, name: ownerProfile.name || 'Tu', participantId: userId, isRegistered: true, paid: true },
       ...participants.map(p => ({
         email:         p.email,
         name:          p.name || null,
         participantId: null,
         isRegistered:  false,
+        paid:          false,
       })),
     ];
 
@@ -132,9 +133,9 @@ const accountService = {
     for (const p of allParticipants) {
       const pid = uuidv4();
       await pool.execute(
-        `INSERT INTO account_participants (id, account_id, participant_id, email, name, is_registered)
-         VALUES (?, ?, ?, ?, ?, ?)`,
-        [pid, accountId, p.participantId, p.email, p.name, p.isRegistered ? 1 : 0]
+        `INSERT INTO account_participants (id, account_id, participant_id, email, name, is_registered, paid)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [pid, accountId, p.participantId, p.email, p.name, p.isRegistered ? 1 : 0, p.paid ? 1 : 0]
       );
       insertedParticipants.push({ id: pid, ...p });
     }
