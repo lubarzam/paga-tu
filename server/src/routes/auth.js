@@ -65,7 +65,7 @@ router.get('/google/callback', (req, res, next) => {
 router.get('/me', authMiddleware, async (req, res) => {
   try {
     const [rows] = await pool.execute(
-      'SELECT id, email, name, avatar_url, created_at, updated_at FROM profiles WHERE id = ?',
+      'SELECT id, email, name, avatar_url, is_admin, created_at, updated_at FROM profiles WHERE id = ?',
       [req.user.id]
     );
 

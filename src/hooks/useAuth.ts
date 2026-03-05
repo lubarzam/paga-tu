@@ -6,6 +6,7 @@ interface ProfileData {
   email: string;
   name?: string | null;
   avatar_url?: string | null;
+  is_admin?: number;
   created_at?: string;
   updated_at?: string;
 }
@@ -15,7 +16,14 @@ interface ProfileData {
  * user_metadata is added for backward compatibility with components
  * that reference user.user_metadata?.name / user.user_metadata?.avatar_url
  */
-export interface AuthUser extends ProfileData {
+export interface AuthUser {
+  id: string;
+  email: string;
+  name?: string | null;
+  avatar_url?: string | null;
+  is_admin: boolean;
+  created_at?: string;
+  updated_at?: string;
   user_metadata: {
     name?: string | null;
     avatar_url?: string | null;
@@ -28,6 +36,7 @@ export const useAuth = () => {
 
   const buildUser = (profile: ProfileData): AuthUser => ({
     ...profile,
+    is_admin: profile.is_admin === 1,
     user_metadata: {
       name:       profile.name,
       avatar_url: profile.avatar_url,

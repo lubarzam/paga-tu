@@ -15,6 +15,7 @@ const invitationsRoutes = require('./src/routes/invitations');
 const remindersRoutes = require('./src/routes/reminders');
 const bankingRoutes = require('./src/routes/banking');
 const contactsRoutes = require('./src/routes/contacts');
+const adminRoutes    = require('./src/routes/admin');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -62,6 +63,7 @@ app.use('/api/invitations',    invitationsRoutes);
 app.use('/api/reminders',      remindersRoutes);
 app.use('/api/banking-details', bankingRoutes);
 app.use('/api/contacts',       contactsRoutes);
+app.use('/api/admin',          adminRoutes);
 
 // Health check
 app.get('/api/health', (_req, res) => {
