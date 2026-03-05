@@ -280,6 +280,9 @@ const accountService = {
         const paidParticipants  = parts.filter(p => p.paid).length;
         const userParticipant   = parts.find(p => p.participant_id === userId);
         const userAmount        = userParticipant ? parseFloat(userParticipant.total_amount) : 0;
+        const pendingAmount     = parts
+          .filter(p => !p.paid)
+          .reduce((sum, p) => sum + parseFloat(p.total_amount || 0), 0);
 
         let status = 'pending';
         if (totalParticipants > 0 && paidParticipants === totalParticipants) {
@@ -290,9 +293,11 @@ const accountService = {
 
         return {
           ...account,
+          total:             parseFloat(account.total || 0),
           participant_count: totalParticipants,
           paid_count:        paidParticipants,
           user_amount:       userAmount,
+          pending_amount:    Math.round(pendingAmount),
           status,
         };
       })

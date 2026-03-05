@@ -83,7 +83,7 @@ const Dashboard = () => {
               <div>
                 <p className="text-white/70 text-xs font-medium uppercase tracking-wide mb-1">Por cobrar</p>
                 <p className="text-3xl font-bold">
-                  ${formatCLP(ownAccounts.reduce((sum, acc) => sum + (acc.total || 0), 0))}
+                  ${formatCLP(ownAccounts.reduce((sum, acc) => sum + (Number(acc.pending_amount) || 0), 0))}
                 </p>
                 <p className="text-white/70 text-xs mt-1">{ownAccounts.length} cuenta{ownAccounts.length !== 1 ? 's' : ''}</p>
               </div>
