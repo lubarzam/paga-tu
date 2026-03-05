@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { formatCLP } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -76,7 +77,7 @@ const Dashboard = () => {
               <div>
                 <p className="text-primary-foreground/80 text-sm">Total por cobrar</p>
                 <p className="text-2xl font-bold">
-                  ${ownAccounts.reduce((sum, acc) => sum + (acc.total || 0), 0).toLocaleString()}
+                  ${formatCLP(ownAccounts.reduce((sum, acc) => sum + (acc.total || 0), 0))}
                 </p>
               </div>
               <TrendingUp className="h-8 w-8 text-primary-foreground/80" />
@@ -90,7 +91,7 @@ const Dashboard = () => {
               <div>
                 <p className="text-white/80 text-sm">Total por pagar</p>
                  <p className="text-2xl font-bold">
-                   ${participantAccounts.reduce((sum, acc) => sum + (acc.user_amount || 0), 0).toLocaleString()}
+                   ${formatCLP(participantAccounts.reduce((sum, acc) => sum + (acc.user_amount || 0), 0))}
                  </p>
               </div>
               <Clock className="h-8 w-8 text-white/80" />
@@ -174,7 +175,7 @@ const Dashboard = () => {
                          </div>
                        </div>
                        <div className="text-right">
-                         <p className="font-semibold text-lg">${account.total?.toLocaleString()}</p>
+                         <p className="font-semibold text-lg">${formatCLP(account.total)}</p>
                          <p className="text-sm text-muted-foreground">Total</p>
                        </div>
                      </div>
@@ -217,9 +218,9 @@ const Dashboard = () => {
                          </div>
                        </div>
                        <div className="text-right">
-                         <p className="font-semibold text-lg">${account.total?.toLocaleString()}</p>
+                         <p className="font-semibold text-lg">${formatCLP(account.total)}</p>
                          <p className="text-xs text-muted-foreground">
-                           Mi parte: ${account.user_amount?.toLocaleString() || '0'}
+                           Mi parte: ${formatCLP(account.user_amount)}
                          </p>
                        </div>
                     </div>

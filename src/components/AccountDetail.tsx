@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { formatCLP } from "@/lib/utils";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -244,15 +245,15 @@ const AccountDetail = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="text-center">
               <p className="text-sm text-muted-foreground">Subtotal</p>
-              <p className="text-2xl font-bold">${account.subtotal?.toLocaleString()}</p>
+              <p className="text-2xl font-bold">${formatCLP(account.subtotal)}</p>
             </div>
             <div className="text-center">
               <p className="text-sm text-muted-foreground">Propina</p>
-              <p className="text-2xl font-bold">${account.tip_amount?.toLocaleString() || 0}</p>
+              <p className="text-2xl font-bold">${formatCLP(account.tip_amount)}</p>
             </div>
             <div className="text-center">
               <p className="text-sm text-muted-foreground">Total</p>
-              <p className="text-3xl font-bold text-primary">${account.total?.toLocaleString()}</p>
+              <p className="text-3xl font-bold text-primary">${formatCLP(account.total)}</p>
             </div>
           </div>
         </CardContent>
@@ -291,7 +292,7 @@ const AccountDetail = () => {
                         </div>
                       )}
                     </div>
-                    <span className="font-semibold ml-4">${item.amount?.toLocaleString()}</span>
+                    <span className="font-semibold ml-4">${formatCLP(item.amount)}</span>
                   </div>
                 </div>
                ))}
@@ -336,7 +337,7 @@ const AccountDetail = () => {
                     </div>
                     <div className="text-right">
                       <p className={`font-semibold ${isCurrentUser ? "text-primary text-lg" : ""}`}>
-                        ${participant.total_amount?.toLocaleString() || 0}
+                        ${formatCLP(participant.total_amount)}
                       </p>
                       <p className="text-sm text-muted-foreground">
                         {isCurrentUser ? "Mi parte" : "Su parte"}
@@ -405,7 +406,7 @@ const AccountDetail = () => {
               <SelectContent>
                 {account?.account_participants?.filter(p => !p.paid).map((participant) => (
                   <SelectItem key={participant.id} value={participant.id}>
-                    {participant.name || participant.email} - ${participant.total_amount?.toLocaleString() || '0'}
+                    {participant.name || participant.email} - ${formatCLP(participant.total_amount)}
                   </SelectItem>
                 ))}
               </SelectContent>

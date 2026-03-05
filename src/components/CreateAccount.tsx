@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { formatCLP } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -481,13 +482,13 @@ const CreateAccount = () => {
                 <div className="space-y-3">
                   <div className="p-3 bg-muted rounded-lg">
                     <p className="text-sm font-medium">
-                      Propina sugerida (10% sobre el total): ${calculateSuggestedTip().toLocaleString()}
+                      Propina sugerida (10% sobre el total): ${formatCLP(calculateSuggestedTip())}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
                       Puedes agregar un monto igual o superior al 10%
                     </p>
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="custom-tip">Monto de propina</Label>
                     <Input
@@ -499,7 +500,7 @@ const CreateAccount = () => {
                       min={calculateSuggestedTip()}
                     />
                     <p className="text-xs text-muted-foreground mt-1">
-                      Mínimo ${calculateSuggestedTip().toLocaleString()} (10% del subtotal)
+                      Mínimo ${formatCLP(calculateSuggestedTip())} (10% del subtotal)
                     </p>
                   </div>
                 </div>
@@ -530,7 +531,7 @@ const CreateAccount = () => {
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold">${item.amount.toLocaleString()}</span>
+                        <span className="font-semibold">${formatCLP(item.amount)}</span>
                         <Button 
                           variant="outline" 
                           size="icon"
@@ -560,7 +561,7 @@ const CreateAccount = () => {
                         {person}
                       </span>
                       <span className="font-semibold">
-                        ${amount.toLocaleString('es-CO', { maximumFractionDigits: 0 })}
+                        ${formatCLP(amount)}
                       </span>
                     </div>
                   );
@@ -569,21 +570,21 @@ const CreateAccount = () => {
                 <div className="border-t pt-3 mt-3">
                   <div className="flex justify-between items-center">
                     <span>Subtotal</span>
-                    <span>${calculateSubtotal().toLocaleString()}</span>
+                    <span>${formatCLP(calculateSubtotal())}</span>
                   </div>
                   
                   {tipIncluded && (
                     <div className="flex justify-between items-center text-muted-foreground">
                       <span>Propina sobre el total</span>
                       <span>
-                        ${(tip ? parseFloat(tip) : calculateSuggestedTip()).toLocaleString()}
+                        ${formatCLP(tip ? parseFloat(tip) : calculateSuggestedTip())}
                       </span>
                     </div>
                   )}
                   
                   <div className="flex justify-between items-center font-bold text-lg border-t pt-2 mt-2">
                     <span>Total</span>
-                    <span>${calculateTotal().toLocaleString()}</span>
+                    <span>${formatCLP(calculateTotal())}</span>
                   </div>
                 </div>
               </div>

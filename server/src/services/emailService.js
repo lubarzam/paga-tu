@@ -78,8 +78,8 @@ const emailService = {
           <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h3 style="margin: 0 0 10px 0; color: #333;">Detalles de la cuenta:</h3>
             <p style="margin: 5px 0;"><strong>Nombre:</strong> ${escapeHtml(accountName)}</p>
-            <p style="margin: 5px 0;"><strong>Total de la cuenta:</strong> $${Number(accountTotal || 0).toLocaleString('es-CL')}</p>
-            <p style="margin: 5px 0;"><strong>Tu parte:</strong> $${Number(participantAmount || 0).toLocaleString('es-CL')}</p>
+            <p style="margin: 5px 0;"><strong>Total de la cuenta:</strong> $${Number(accountTotal || 0).toLocaleString('es-CL', { maximumFractionDigits: 0 })}</p>
+            <p style="margin: 5px 0;"><strong>Tu parte:</strong> $${Number(participantAmount || 0).toLocaleString('es-CL', { maximumFractionDigits: 0 })}</p>
             <p style="margin: 5px 0;"><strong>Pagado por:</strong> ${escapeHtml(owner.name || owner.email)}</p>
           </div>
 
