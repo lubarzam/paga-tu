@@ -30,39 +30,39 @@ const LandingPage = () => {
     {
       icon: <Users className="h-6 w-6" />,
       gradient: "from-violet-500 to-purple-600",
-      title: "División Inteligente",
-      description: "Cada persona paga exactamente por lo que consumió. Sin discusiones, sin cálculos.",
+      title: "Pa' cada uno lo suyo",
+      description: "Cada persona paga exactamente lo que consumió. Sin el cuento del 'dividamos en partes iguales', poh.",
     },
     {
       icon: <Calculator className="h-6 w-6" />,
       gradient: "from-emerald-500 to-teal-600",
-      title: "Propina Incluida",
-      description: "Agrega propina y se distribuye proporcionalmente entre todos los participantes.",
+      title: "Propina sin drama",
+      description: "Agrega la propina del 10% y se distribuye proporcionalmente. Tal como manda la ley chilena.",
     },
     {
       icon: <Bell className="h-6 w-6" />,
       gradient: "from-orange-400 to-rose-500",
-      title: "Recordatorios por Email",
-      description: "Envía recordatorios a quienes aún no han pagado, sin incomodar a nadie.",
+      title: "Cobra sin quedar mal",
+      description: "Manda recordatorios por email a los que deben. Sin conversaciones incómodas en el grupo de WhatsApp.",
     },
     {
       icon: <Zap className="h-6 w-6" />,
       gradient: "from-blue-500 to-cyan-600",
-      title: "Instantáneo",
-      description: "Crea y comparte una cuenta en menos de 2 minutos desde tu celular.",
+      title: "Al tiro y desde el celu",
+      description: "Crea la cuenta en 2 minutos, justo cuando llega la boleta. No más 'ya te mando el número después'.",
     },
   ];
 
   const steps = [
-    { number: "01", title: "Crea la cuenta", desc: "Ingresa el total y los ítems consumidos" },
-    { number: "02", title: "Asigna personas", desc: "Indica quién participó en cada ítem" },
-    { number: "03", title: "Comparte y cobra", desc: "El sistema calcula cuánto debe cada uno" },
+    { number: "01", title: "Crea la cuenta", desc: "Ingresa el total y los ítems del asado, boliche o restaurant" },
+    { number: "02", title: "Asigna a cada uno", desc: "Marca quién pidió qué. El Rodrigo que se comió dos completos que pague por dos" },
+    { number: "03", title: "Cobra y listo", desc: "El sistema calcula lo de cada uno. Tú solo pasas el dato y a cobrar" },
   ];
 
   const testimonials = [
-    { name: "María G.", comment: "¡Perfecto para nuestras salidas de trabajo! Ya no hay confusión con las cuentas.", rating: 5, initial: "M" },
-    { name: "Carlos R.", comment: "Me encanta que puedo agregar la propina y se divide automáticamente.", rating: 5, initial: "C" },
-    { name: "Ana S.", comment: "Super fácil de usar, mis amigos y yo lo usamos en cada salida.", rating: 5, initial: "A" },
+    { name: "Camila F.", comment: "¡Lo uso pa' todos los asados del fin de semana! Se acabó el drama de dividir la carne.", rating: 5, initial: "C" },
+    { name: "Rodrigo N.", comment: "Bacán que incluya la propina automática. En el boliche siempre había cuento con eso.", rating: 5, initial: "R" },
+    { name: "Valentina H.", comment: "Mis amigas y yo lo usamos en cada junta. Nadie queda debiendo ni un peso.", rating: 5, initial: "V" },
   ];
 
   return (
@@ -119,7 +119,8 @@ const LandingPage = () => {
               </h1>
 
               <p className="text-xl text-muted-foreground leading-relaxed">
-                Cada persona paga exactamente por lo que consumió. Propina incluida, recordatorios automáticos, sin peleas.
+                Para el asado, el boliche, el viaje a Pucón o el almuerzo de trabajo.
+                Cada uno paga lo suyo, con propina incluida y sin el cuento del "después te pago".
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4">
@@ -186,8 +187,8 @@ const LandingPage = () => {
       <section className="py-20">
         <div className="container px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-4xl font-bold mb-3">¿Cómo funciona?</h2>
-            <p className="text-muted-foreground text-lg">Solo 3 pasos para dividir cualquier cuenta</p>
+            <h2 className="text-3xl lg:text-4xl font-bold mb-3">¿Cómo funciona, poh?</h2>
+            <p className="text-muted-foreground text-lg">Solo 3 pasos y ya está listo el asunto</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
@@ -329,9 +330,9 @@ const LandingPage = () => {
               <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-white/10 rounded-full" />
             </div>
             <div className="relative space-y-6">
-              <h2 className="text-3xl lg:text-4xl font-bold">¿Listo para dividir sin drama?</h2>
+              <h2 className="text-3xl lg:text-4xl font-bold">¿Listo pa' no quedar debiendo?</h2>
               <p className="text-white/80 text-lg max-w-md mx-auto">
-                Gratis, sin publicidad, sin trucos. Solo la forma más justa de dividir una cuenta.
+                Gratis, sin publicidad, sin trucos. Solo la forma más bacán de dividir una cuenta en Chile.
               </p>
               <Button
                 size="lg"
@@ -339,7 +340,7 @@ const LandingPage = () => {
                 className="text-base px-8 h-12 bg-white text-violet-600 hover:bg-white/90 font-semibold"
                 onClick={handleAuthAction}
               >
-                Empezar ahora — Es Gratis
+                Empezar al tiro — Es Gratis
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </div>

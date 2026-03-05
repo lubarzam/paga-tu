@@ -8,8 +8,8 @@ const HeroIllustration = () => (
     <div className="absolute -top-4 -left-6 bg-white rounded-2xl shadow-lg px-4 py-2.5 flex items-center gap-2.5 z-10 border border-emerald-100">
       <div className="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center text-sm">✅</div>
       <div>
-        <p className="text-xs font-semibold text-emerald-700">Carlos pagó</p>
-        <p className="text-xs text-muted-foreground">$9.500</p>
+        <p className="text-xs font-semibold text-emerald-700">¡Wena, el Rodo pagó!</p>
+        <p className="text-xs text-muted-foreground">$12.500</p>
       </div>
     </div>
 
@@ -18,7 +18,7 @@ const HeroIllustration = () => (
       <div className="w-7 h-7 rounded-full bg-orange-100 flex items-center justify-center text-sm">🔔</div>
       <div>
         <p className="text-xs font-semibold text-orange-700">Recordatorio enviado</p>
-        <p className="text-xs text-muted-foreground">a 2 personas</p>
+        <p className="text-xs text-muted-foreground">al Coto y la Katy</p>
       </div>
     </div>
 
@@ -32,16 +32,16 @@ const HeroIllustration = () => (
       {/* App header */}
       <div className="bg-gradient-to-r from-violet-500 to-purple-600 px-4 py-3">
         <p className="text-white/70 text-[10px] font-medium uppercase tracking-wider">Cuenta</p>
-        <p className="text-white font-bold text-sm">Cena del viernes 🍕</p>
-        <p className="text-white/80 text-xs mt-0.5">Total: $42.800</p>
+        <p className="text-white font-bold text-sm">Asado del sábado 🍖</p>
+        <p className="text-white/80 text-xs mt-0.5">Total: $48.500</p>
       </div>
 
       {/* Participants */}
       <div className="px-3 py-3 space-y-2">
         {[
-          { name: "Camila", amount: "$14.200", paid: true,  color: "bg-violet-100 text-violet-600" },
-          { name: "Rodrigo", amount: "$16.500", paid: false, color: "bg-blue-100 text-blue-600" },
-          { name: "Valentina", amount: "$12.100", paid: false, color: "bg-rose-100 text-rose-600" },
+          { name: "Camila",  amount: "$15.200", paid: true,  color: "bg-violet-100 text-violet-600" },
+          { name: "Rodrigo", amount: "$18.800", paid: false, color: "bg-blue-100 text-blue-600" },
+          { name: "Katerine", amount: "$14.500", paid: false, color: "bg-rose-100 text-rose-600" },
         ].map((p) => (
           <div key={p.name} className="flex items-center justify-between bg-gray-50 rounded-xl px-3 py-2">
             <div className="flex items-center gap-2">
@@ -65,9 +65,9 @@ const HeroIllustration = () => (
       <div className="px-3 pb-3 space-y-1">
         <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider px-1">Ítems</p>
         {[
-          { name: "Pizza familiar", amount: "$18.000" },
-          { name: "Bebidas x3",    amount: "$12.000" },
-          { name: "Propina (10%)", amount: "$3.000"  },
+          { name: "Carne al palo",   amount: "$24.000" },
+          { name: "Bebidas y hielo", amount: "$18.500" },
+          { name: "Propina (10%)",   amount: "$4.250"  },
         ].map((item) => (
           <div key={item.name} className="flex justify-between px-1">
             <span className="text-[11px] text-gray-500">{item.name}</span>
@@ -78,7 +78,7 @@ const HeroIllustration = () => (
 
       {/* Bottom bar */}
       <div className="bg-gradient-to-r from-violet-500 to-purple-600 px-4 py-2.5 flex justify-between items-center">
-        <span className="text-white/80 text-[11px]">Enviar recordatorio</span>
+        <span className="text-white/80 text-[11px]">Cobrar al tiro</span>
         <div className="bg-white/20 rounded-full px-3 py-1">
           <span className="text-white text-[11px] font-semibold">🔔 Enviar</span>
         </div>

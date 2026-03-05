@@ -155,8 +155,8 @@ const Dashboard = () => {
                   <div className="bg-primary/10 rounded-full w-14 h-14 flex items-center justify-center mx-auto mb-4">
                     <CreditCard className="h-7 w-7 text-primary" />
                   </div>
-                  <p className="font-medium mb-1">Aún no has creado cuentas</p>
-                  <p className="text-muted-foreground text-sm mb-4">Divide gastos fácilmente con tus amigos</p>
+                  <p className="font-medium mb-1">¡Nada por aquí todavía, poh!</p>
+                  <p className="text-muted-foreground text-sm mb-4">Crea tu primera cuenta pa' el próximo asado, junta o viaje</p>
                   <Button onClick={() => navigate('/create')}>Crear mi primera cuenta</Button>
                 </CardContent>
               </Card>
@@ -214,8 +214,8 @@ const Dashboard = () => {
                   <div className="bg-green-100 rounded-full w-14 h-14 flex items-center justify-center mx-auto mb-4">
                     <CheckCircle className="h-7 w-7 text-green-600" />
                   </div>
-                  <p className="font-medium mb-1">¡Todo al día!</p>
-                  <p className="text-muted-foreground text-sm">No tienes cuentas pendientes por pagar</p>
+                  <p className="font-medium mb-1">¡Eres un capo, no debes na'!</p>
+                  <p className="text-muted-foreground text-sm">No tienes cuentas pendientes — wena po'</p>
                 </CardContent>
               </Card>
             ) : (

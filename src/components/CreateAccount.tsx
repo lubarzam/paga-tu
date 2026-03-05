@@ -317,7 +317,7 @@ const CreateAccount = () => {
                 <Label htmlFor="accountName">Nombre de la cuenta</Label>
                 <Input
                   id="accountName"
-                  placeholder="Ej: Cena en el restaurante"
+                  placeholder="Ej: Asado del sábado"
                   value={accountName}
                   onChange={(e) => setAccountName(e.target.value)}
                 />
