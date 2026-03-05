@@ -399,7 +399,7 @@ const LandingPage = () => {
               </div>
             </div>
             <div className="flex items-center gap-3 text-sm text-muted-foreground">
-              <span>© 2025 PagaTú.</span>
+              <span>© {new Date().getFullYear()} PagaTú — Digitaliza SpA.</span>
               <button
                 onClick={() => navigate('/privacy')}
                 className="underline hover:text-foreground transition-colors"
