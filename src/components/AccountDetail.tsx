@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Users, Calendar, User, DollarSign, X, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Users, Calendar, User, DollarSign, X, AlertTriangle, Copy, Check } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { accountService } from "@/services/accountService";
 import { useToast } from "@/hooks/use-toast";
@@ -27,6 +27,7 @@ const AccountDetail = () => {
   const [selectedParticipant, setSelectedParticipant] = useState("");
   const [showBankDataWarning, setShowBankDataWarning] = useState(false);
   const [userProfile, setUserProfile] = useState(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -121,6 +122,26 @@ const AccountDetail = () => {
     }
   };
 
+  const handleCopyForWhatsApp = () => {
+    if (!account) return;
+    const date = new Date(account.created_at).toLocaleDateString('es-CL');
+    const lines = [
+      `💰 *${account.name}*`,
+      `📅 ${date}`,
+      ``,
+      ...(account.account_participants || []).map(
+        (p: { name?: string; email?: string; total_amount?: number; paid?: boolean }) =>
+          `• ${p.name || p.email}: $${Number(p.total_amount || 0).toLocaleString('es-CL', { maximumFractionDigits: 0 })}${p.paid ? ' ✅' : ''}`
+      ),
+      ``,
+      `*Total: $${Number(account.total || 0).toLocaleString('es-CL', { maximumFractionDigits: 0 })}*`,
+    ];
+    navigator.clipboard.writeText(lines.join('\n'));
+    setCopied(true);
+    toast({ title: "¡Copiado!", description: "Resumen listo para pegar en WhatsApp" });
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   const handleDeleteAccount = async () => {
     try {
       await accountService.deleteAccount(id);
@@ -186,7 +207,16 @@ const AccountDetail = () => {
             )}
           </div>
         </div>
-        <div className="text-right text-sm text-muted-foreground">
+        <div className="flex flex-col items-end gap-2 text-sm text-muted-foreground">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleCopyForWhatsApp}
+            className="flex items-center gap-1.5 text-emerald-700 border-emerald-200 hover:bg-emerald-50"
+          >
+            {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+            {copied ? "¡Copiado!" : "Copiar resumen"}
+          </Button>
           <div className="flex items-center gap-2">
             <Calendar className="h-4 w-4" />
             <span>Creado el {new Date(account.created_at).toLocaleDateString()}</span>

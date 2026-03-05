@@ -1,19 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
-import { DollarSign, Calculator, Users, Bell, ArrowRight, Star } from "lucide-react";
+import { DollarSign, Calculator, Users, Bell, ArrowRight, Star, Zap, Check, Sparkles } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect } from "react";
-import heroImage from "@/assets/hero-banner.jpg";
-import featureSplit from "@/assets/feature-split.jpg";
-import featurePrecise from "@/assets/feature-precise.jpg";
-import featureTrack from "@/assets/feature-track.jpg";
 
 const LandingPage = () => {
   const navigate = useNavigate();
   const { user, signInWithGoogle } = useAuth();
 
-  // Auto-redirect to dashboard if already authenticated
   useEffect(() => {
     if (user) navigate('/dashboard');
   }, [user, navigate]);
@@ -32,160 +27,149 @@ const LandingPage = () => {
 
   const features = [
     {
-      icon: <Users className="h-8 w-8 text-primary" />,
+      icon: <Users className="h-6 w-6" />,
+      gradient: "from-violet-500 to-purple-600",
       title: "División Inteligente",
-      description: "Divide gastos de manera precisa según lo que cada persona consumió realmente",
-      image: featureSplit
+      description: "Cada persona paga exactamente por lo que consumió. Sin discusiones, sin cálculos.",
     },
     {
-      icon: <Calculator className="h-8 w-8 text-primary" />,
-      title: "Cálculos Exactos",
-      description: "Incluye propinas y distribuye los montos proporcionalmente sin errores",
-      image: featurePrecise
+      icon: <Calculator className="h-6 w-6" />,
+      gradient: "from-emerald-500 to-teal-600",
+      title: "Propina Incluida",
+      description: "Agrega propina y se distribuye proporcionalmente entre todos los participantes.",
     },
     {
-      icon: <Bell className="h-8 w-8 text-primary" />,
-      title: "Seguimiento Fácil",
-      description: "Mantén el control de quién pagó y quién debe, todo en un lugar",
-      image: featureTrack
-    }
+      icon: <Bell className="h-6 w-6" />,
+      gradient: "from-orange-400 to-rose-500",
+      title: "Recordatorios por Email",
+      description: "Envía recordatorios a quienes aún no han pagado, sin incomodar a nadie.",
+    },
+    {
+      icon: <Zap className="h-6 w-6" />,
+      gradient: "from-blue-500 to-cyan-600",
+      title: "Instantáneo",
+      description: "Crea y comparte una cuenta en menos de 2 minutos desde tu celular.",
+    },
+  ];
+
+  const steps = [
+    { number: "01", title: "Crea la cuenta", desc: "Ingresa el total y los ítems consumidos" },
+    { number: "02", title: "Asigna personas", desc: "Indica quién participó en cada ítem" },
+    { number: "03", title: "Comparte y cobra", desc: "El sistema calcula cuánto debe cada uno" },
   ];
 
   const testimonials = [
-    {
-      name: "María González",
-      comment: "¡Perfecto para nuestras salidas de trabajo! Ya no hay confusión con las cuentas.",
-      rating: 5
-    },
-    {
-      name: "Carlos Ruiz",
-      comment: "Me encanta que puedo agregar la propina y se divide automáticamente.",
-      rating: 5
-    },
-    {
-      name: "Ana Silva",
-      comment: "Super fácil de usar, mis amigos y yo lo usamos en cada salida.",
-      rating: 5
-    }
+    { name: "María G.", comment: "¡Perfecto para nuestras salidas de trabajo! Ya no hay confusión con las cuentas.", rating: 5, initial: "M" },
+    { name: "Carlos R.", comment: "Me encanta que puedo agregar la propina y se divide automáticamente.", rating: 5, initial: "C" },
+    { name: "Ana S.", comment: "Super fácil de usar, mis amigos y yo lo usamos en cada salida.", rating: 5, initial: "A" },
   ];
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-40 w-full border-b bg-card/80 backdrop-blur supports-[backdrop-filter]:bg-card/80">
+      <header className="sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/80">
         <div className="container flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-2">
-            <DollarSign className="h-8 w-8 text-primary" />
+            <div className="bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl p-1.5">
+              <DollarSign className="h-5 w-5 text-white" />
+            </div>
             <div>
-              <h1 className="text-xl font-bold text-foreground">PagaTu</h1>
-              <p className="text-xs text-muted-foreground">mañana arreglamos</p>
+              <span className="text-xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">PagaTú</span>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2">
-            {user ? (
-              <Button onClick={() => navigate('/dashboard')}>
-                Dashboard
-              </Button>
-            ) : (
-              <>
-                <Button 
-                  variant="ghost" 
-                  onClick={handleAuthAction}
-                >
-                  Iniciar Sesión
-                </Button>
-                <Button onClick={handleAuthAction}>
-                  Comenzar Gratis
-                </Button>
-              </>
-            )}
+            <Button variant="ghost" onClick={handleAuthAction}>
+              Iniciar Sesión
+            </Button>
+            <Button
+              className="bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 border-0"
+              onClick={handleAuthAction}
+            >
+              Comenzar Gratis
+            </Button>
           </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden py-20 lg:py-32">
-        <div className="container px-4">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-8">
-              <div className="space-y-4">
-                <h1 className="text-4xl lg:text-6xl font-bold text-foreground leading-tight">
-                  Divide gastos{" "}
-                  <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                    de manera justa
-                  </span>
-                </h1>
-                <p className="text-xl text-muted-foreground max-w-md">
-                  Sin dividir en partes iguales. Cada quien paga exactamente por lo que consumió.
-                </p>
-                <p className="text-lg font-semibold text-primary">
-                  "mañana arreglamos" ✨
-                </p>
-              </div>
-              
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button 
-                  size="lg" 
-                  className="text-lg px-8"
-                  onClick={handleAuthAction}
-                >
-                  Crear Mi Primera Cuenta
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-                <Button 
-                  size="lg" 
-                  variant="outline"
-                  onClick={handleAuthAction}
-                >
-                  Ver Demo
-                </Button>
-              </div>
+      <section className="relative overflow-hidden py-24 lg:py-36">
+        {/* Background gradient blobs */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-40 -right-40 w-96 h-96 bg-violet-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40" />
+          <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-emerald-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-purple-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30" />
+        </div>
+
+        <div className="container px-4 relative">
+          <div className="max-w-3xl mx-auto text-center space-y-8">
+            <div className="inline-flex items-center gap-2 bg-violet-50 border border-violet-200 rounded-full px-4 py-1.5 text-sm text-violet-700 font-medium">
+              <Sparkles className="h-3.5 w-3.5" />
+              100% Gratis · Sin registro de tarjeta
             </div>
-            
-            <div className="relative">
-              <img 
-                src={heroImage} 
-                alt="Amigos dividiendo la cuenta en un restaurante"
-                className="rounded-2xl shadow-2xl w-full"
-              />
+
+            <h1 className="text-5xl lg:text-7xl font-extrabold leading-tight tracking-tight">
+              Divide gastos{" "}
+              <span className="bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                sin drama
+              </span>
+            </h1>
+
+            <p className="text-xl text-muted-foreground max-w-xl mx-auto leading-relaxed">
+              Cada persona paga exactamente por lo que consumió. Propina incluida, recordatorios automáticos, sin peleas.
+            </p>
+
+            <p className="text-base font-semibold text-violet-600">
+              "mañana arreglamos" ✨ — pero con PagaTú, hoy mismo.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button
+                size="lg"
+                className="text-base px-8 h-12 bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 border-0 shadow-lg shadow-violet-200"
+                onClick={handleAuthAction}
+              >
+                Crear mi primera cuenta
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </div>
+
+            {/* Social proof */}
+            <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
+              <div className="flex items-center gap-1">
+                <div className="flex">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                  ))}
+                </div>
+                <span className="ml-1">5.0</span>
+              </div>
+              <div className="w-px h-4 bg-border" />
+              <span>Gratis para siempre</span>
+              <div className="w-px h-4 bg-border" />
+              <span>Sin anuncios</span>
             </div>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-muted/50">
+      <section className="py-20 bg-muted/30">
         <div className="container px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
-              ¿Por qué elegir PagaTu?
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              La forma más fácil y precisa de dividir gastos entre amigos, familia o compañeros de trabajo
-            </p>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl lg:text-4xl font-bold mb-3">Todo lo que necesitas</h2>
+            <p className="text-muted-foreground text-lg">Simple, rápido y justo para todos</p>
           </div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {features.map((feature, index) => (
-              <Card key={index} className="overflow-hidden hover:shadow-lg transition-shadow">
-                <div className="aspect-square overflow-hidden">
-                  <img 
-                    src={feature.image} 
-                    alt={feature.title}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
+              <Card key={index} className="border-0 shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
                 <CardContent className="p-6 space-y-4">
-                  <div className="flex items-center gap-3">
-                    {feature.icon}
-                    <h3 className="text-xl font-semibold text-foreground">
-                      {feature.title}
-                    </h3>
+                  <div className={`bg-gradient-to-br ${feature.gradient} rounded-2xl p-3 w-fit`}>
+                    <div className="text-white">{feature.icon}</div>
                   </div>
-                  <p className="text-muted-foreground">
-                    {feature.description}
-                  </p>
+                  <h3 className="font-semibold text-lg">{feature.title}</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">{feature.description}</p>
                 </CardContent>
               </Card>
             ))}
@@ -196,73 +180,133 @@ const LandingPage = () => {
       {/* How it Works */}
       <section className="py-20">
         <div className="container px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
-              ¿Cómo funciona?
-            </h2>
-            <p className="text-xl text-muted-foreground">
-              Solo 3 pasos para dividir cualquier cuenta
-            </p>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl lg:text-4xl font-bold mb-3">¿Cómo funciona?</h2>
+            <p className="text-muted-foreground text-lg">Solo 3 pasos para dividir cualquier cuenta</p>
           </div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-primary-foreground">1</span>
+
+          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            {steps.map((step, index) => (
+              <div key={index} className="relative text-center space-y-4">
+                {index < steps.length - 1 && (
+                  <div className="hidden md:block absolute top-8 left-[60%] w-[80%] h-px bg-gradient-to-r from-violet-300 to-transparent" />
+                )}
+                <div className="w-16 h-16 bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-violet-200">
+                  <span className="text-xl font-bold text-white">{step.number}</span>
+                </div>
+                <h3 className="text-lg font-semibold">{step.title}</h3>
+                <p className="text-muted-foreground text-sm">{step.desc}</p>
               </div>
-              <h3 className="text-xl font-semibold text-foreground">Crea la cuenta</h3>
-              <p className="text-muted-foreground">
-                Ingresa el total que pagaste y agrega los ítems consumidos
-              </p>
-            </div>
-            
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-primary-foreground">2</span>
-              </div>
-              <h3 className="text-xl font-semibold text-foreground">Asigna participantes</h3>
-              <p className="text-muted-foreground">
-                Selecciona quién participó en cada ítem y agrega propina si deseas
-              </p>
-            </div>
-            
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-primary-foreground">3</span>
-              </div>
-              <h3 className="text-xl font-semibold text-foreground">Comparte y cobra</h3>
-              <p className="text-muted-foreground">
-                El sistema calcula automáticamente cuánto debe pagar cada persona
-              </p>
-            </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section className="py-20 bg-muted/30">
+        <div className="container px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl lg:text-4xl font-bold mb-3">Planes</h2>
+            <p className="text-muted-foreground text-lg">Empieza gratis, sin límites</p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+            {/* Free Plan */}
+            <Card className="border-2 border-violet-200 shadow-md">
+              <CardContent className="p-8 space-y-6">
+                <div>
+                  <div className="inline-flex items-center gap-1 bg-emerald-100 text-emerald-700 text-xs font-semibold px-2.5 py-1 rounded-full mb-3">
+                    <Check className="h-3 w-3" /> Disponible ahora
+                  </div>
+                  <h3 className="text-2xl font-bold">Gratis</h3>
+                  <p className="text-4xl font-extrabold mt-1">$0 <span className="text-base font-normal text-muted-foreground">/mes</span></p>
+                </div>
+                <ul className="space-y-3">
+                  {[
+                    "Cuentas ilimitadas",
+                    "Participantes ilimitados",
+                    "Recordatorios por email",
+                    "Datos bancarios en perfil",
+                    "División exacta por ítem",
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-center gap-2 text-sm">
+                      <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                        <Check className="h-3 w-3 text-emerald-600" />
+                      </div>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <Button
+                  className="w-full bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 border-0"
+                  onClick={handleAuthAction}
+                >
+                  Comenzar gratis
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Pro Plan */}
+            <Card className="border-2 border-dashed border-muted-foreground/30 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-violet-50 to-purple-50 opacity-50" />
+              <CardContent className="p-8 space-y-6 relative">
+                <div>
+                  <div className="inline-flex items-center gap-1 bg-violet-100 text-violet-700 text-xs font-semibold px-2.5 py-1 rounded-full mb-3">
+                    <Sparkles className="h-3 w-3" /> Próximamente
+                  </div>
+                  <h3 className="text-2xl font-bold text-muted-foreground">Pro</h3>
+                  <p className="text-4xl font-extrabold mt-1 text-muted-foreground">$990 <span className="text-base font-normal">/mes</span></p>
+                </div>
+                <ul className="space-y-3">
+                  {[
+                    "Todo del plan Gratis",
+                    "Exportar resumen en PDF",
+                    "Integración con Webpay / Mercado Pago",
+                    "Historial de pagos con gráficos",
+                    "Cuentas recurrentes",
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <div className="w-5 h-5 rounded-full bg-violet-100 flex items-center justify-center shrink-0">
+                        <Check className="h-3 w-3 text-violet-400" />
+                      </div>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <Button variant="outline" className="w-full" disabled>
+                  Próximamente
+                </Button>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
 
       {/* Testimonials */}
-      <section className="py-20 bg-muted/50">
+      <section className="py-20">
         <div className="container px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
-              Lo que dicen nuestros usuarios
-            </h2>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl lg:text-4xl font-bold mb-3">Lo que dicen nuestros usuarios</h2>
           </div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
+
+          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             {testimonials.map((testimonial, index) => (
-              <Card key={index} className="p-6">
-                <CardContent className="space-y-4">
-                  <div className="flex gap-1">
+              <Card key={index} className="border-0 shadow-sm">
+                <CardContent className="p-6 space-y-4">
+                  <div className="flex gap-0.5">
                     {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="h-5 w-5 fill-primary text-primary" />
+                      <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                     ))}
                   </div>
-                  <p className="text-muted-foreground italic">
+                  <p className="text-muted-foreground text-sm leading-relaxed italic">
                     "{testimonial.comment}"
                   </p>
-                  <p className="font-semibold text-foreground">
-                    {testimonial.name}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-400 to-purple-500 flex items-center justify-center text-white text-xs font-bold">
+                      {testimonial.initial}
+                    </div>
+                    <p className="font-semibold text-sm">{testimonial.name}</p>
+                  </div>
                 </CardContent>
               </Card>
             ))}
@@ -273,38 +317,45 @@ const LandingPage = () => {
       {/* CTA Section */}
       <section className="py-20">
         <div className="container px-4">
-          <div className="text-center space-y-8 max-w-3xl mx-auto">
-            <h2 className="text-3xl lg:text-4xl font-bold text-foreground">
-              ¿Listo para dividir cuentas sin drama?
-            </h2>
-            <p className="text-xl text-muted-foreground">
-              Únete a miles de usuarios que ya divideen sus gastos de manera inteligente
-            </p>
-            <Button 
-              size="lg" 
-              className="text-lg px-8"
-              onClick={handleAuthAction}
-            >
-              Comenzar Ahora - Es Gratis
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
+          <div className="relative bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 rounded-3xl p-12 text-center text-white overflow-hidden max-w-3xl mx-auto">
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              <div className="absolute -top-20 -right-20 w-64 h-64 bg-white/10 rounded-full" />
+              <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-white/10 rounded-full" />
+            </div>
+            <div className="relative space-y-6">
+              <h2 className="text-3xl lg:text-4xl font-bold">¿Listo para dividir sin drama?</h2>
+              <p className="text-white/80 text-lg max-w-md mx-auto">
+                Gratis, sin publicidad, sin trucos. Solo la forma más justa de dividir una cuenta.
+              </p>
+              <Button
+                size="lg"
+                variant="secondary"
+                className="text-base px-8 h-12 bg-white text-violet-600 hover:bg-white/90 font-semibold"
+                onClick={handleAuthAction}
+              >
+                Empezar ahora — Es Gratis
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t py-12">
+      <footer className="border-t py-10">
         <div className="container px-4">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-2">
-              <DollarSign className="h-6 w-6 text-primary" />
+              <div className="bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl p-1.5">
+                <DollarSign className="h-4 w-4 text-white" />
+              </div>
               <div>
-                <p className="font-bold text-foreground">PagaTu</p>
-                <p className="text-sm text-muted-foreground">mañana arreglamos</p>
+                <span className="font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">PagaTú</span>
+                <p className="text-xs text-muted-foreground">"mañana arreglamos"</p>
               </div>
             </div>
             <p className="text-sm text-muted-foreground">
-              © 2024 PagaTu. Todos los derechos reservados.
+              © 2025 PagaTú. La forma más fácil de dividir gastos.
             </p>
           </div>
         </div>

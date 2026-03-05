@@ -29,20 +29,21 @@ const Layout = () => {
         <div className="container flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-2">
             {showBackButton && (
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 size="icon"
                 onClick={() => navigate(-1)}
-                className="mr-2"
+                className="mr-1"
               >
                 <ArrowLeft className="h-4 w-4" />
               </Button>
             )}
-            <DollarSign className="h-8 w-8 text-primary" />
-            <div>
-              <h1 className="text-xl font-bold text-foreground">PagaTu</h1>
-              <p className="text-xs text-muted-foreground">mañana arreglamos</p>
+            <div className="bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl p-1.5">
+              <DollarSign className="h-5 w-5 text-white" />
             </div>
+            <span className="text-xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
+              PagaTú
+            </span>
           </div>
           
           <div className="flex items-center gap-2">
