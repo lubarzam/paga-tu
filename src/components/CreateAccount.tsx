@@ -307,28 +307,42 @@ const CreateAccount = () => {
     fileInputRef.current?.click();
   };
 
-  const onFileSelected = (e: { target: HTMLInputElement }) => {
+  const onFileSelected = async (e: { target: HTMLInputElement }) => {
     const file = e.target.files?.[0];
     if (!file) return;
     e.target.value = '';
 
     setIsScanning(true);
-    const reader = new FileReader();
-    reader.onload = async () => {
-      try {
-        const dataUrl = reader.result as string;
-        const base64 = dataUrl.split(',')[1];
-        const mimeType = file.type as 'image/jpeg' | 'image/png' | 'image/webp' | 'image/gif';
-        const items = await accountService.scanReceipt(base64, mimeType);
-        setScannedItems(items.map(item => ({ ...item, selected: true })));
-        setShowScanModal(true);
-      } catch {
-        toast({ title: "Error", description: "No se pudo analizar la boleta.", variant: "destructive" });
-      } finally {
-        setIsScanning(false);
+    try {
+      const { createWorker } = await import('tesseract.js');
+      const worker = await createWorker('spa');
+      const { data: { text } } = await worker.recognize(file);
+      await worker.terminate();
+
+      // Parse lines: match "some text   1234" or "some text   $1.234"
+      const lines = text.split('\n');
+      const detected: { name: string; amount: number; selected: boolean }[] = [];
+      for (const line of lines) {
+        const match = line.trim().match(/^(.+?)\s{2,}[\$]?\s*([\d.,]+)\s*$/);
+        if (!match) continue;
+        const name = match[1].replace(/\s+/g, ' ').trim();
+        const amount = parseInt(match[2].replace(/[.,]/g, ''), 10);
+        if (name.length > 1 && amount > 0) {
+          detected.push({ name, amount, selected: true });
+        }
       }
-    };
-    reader.readAsDataURL(file);
+
+      if (detected.length === 0) {
+        toast({ title: "Sin resultados", description: "No se detectaron ítems. Intenta con una foto más clara.", variant: "destructive" });
+      } else {
+        setScannedItems(detected);
+        setShowScanModal(true);
+      }
+    } catch {
+      toast({ title: "Error", description: "No se pudo procesar la imagen.", variant: "destructive" });
+    } finally {
+      setIsScanning(false);
+    }
   };
 
   const confirmScannedItems = () => {

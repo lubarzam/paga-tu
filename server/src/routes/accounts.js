@@ -3,7 +3,6 @@ const pool = require('../config/database');
 const authMiddleware = require('../middleware/auth');
 const accountService = require('../services/accountService');
 const invitationService = require('../services/invitationService');
-const receiptService = require('../services/receiptService');
 
 const router = express.Router();
 
@@ -121,21 +120,6 @@ router.put('/:id/participants/:pid/paid', authMiddleware, async (req, res) => {
   } catch (err) {
     console.error('Error marking as paid:', err);
     res.status(500).json({ error: 'Error al marcar como pagado' });
-  }
-});
-
-// ── POST /api/accounts/scan-receipt ───────────────────────
-router.post('/scan-receipt', authMiddleware, async (req, res) => {
-  try {
-    const { image, mimeType } = req.body;
-    if (!image || !mimeType) {
-      return res.status(400).json({ error: 'Se requiere image y mimeType' });
-    }
-    const items = await receiptService.extractItemsFromReceipt(image, mimeType);
-    res.json({ items });
-  } catch (err) {
-    console.error('Error scanning receipt:', err);
-    res.status(500).json({ error: 'No se pudo analizar la boleta' });
   }
 });
 

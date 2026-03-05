@@ -61,11 +61,4 @@ export const accountService = {
     return apiClient.delete(`/api/accounts/${id}`);
   },
 
-  async scanReceipt(imageBase64: string, mimeType: string): Promise<{ name: string; amount: number }[]> {
-    const result = await apiClient.post<{ items: { name: string; amount: number }[] }>(
-      '/api/accounts/scan-receipt',
-      { image: imageBase64, mimeType }
-    );
-    return result.items;
-  },
 };
